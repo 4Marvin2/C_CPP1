@@ -1,14 +1,13 @@
 cmake_minimum_required (VERSION 3.16) 
  
-set (PROJECT search_my_author) 
+set (PROJECT HW1) 
  
 project (${PROJECT}) 
  
-set (HEADERS 
-	../utils.h)
+include_directories("${PROJECT_SOURCE_DIR}/include")
+
+file(GLOB sources
+        "${PROJECT_SOURCE_DIR}/include/*.h"
+        "${PROJECT_SOURCE_DIR}/src/*.c")
  
-set (SOURCES 
-	../utils.c
-	../main.c) 
- 
-add_executable (${PROJECT} ${HEADERS} ${SOURCES})
+add_executable (${PROJECT} ${sources})
