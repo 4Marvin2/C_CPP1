@@ -7,10 +7,6 @@ project (${PROJECT})
 ##
 ### Test definitions ###
 ##
-
-##
-### Test definitions ###
-##
 configure_file(CMakeLists.txt.in
         googletest-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
@@ -23,6 +19,10 @@ add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
 
 enable_testing()
 add_subdirectory(test)
+##
+### Test definitions ###
+##
+
 ##
 ### Source definitions ###
 ##
