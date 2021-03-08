@@ -12,6 +12,7 @@ install:
 
 script:
   - cpplint --extensions=c include/*/* src/*
+  - cpplint --extensions=cpp test/*.cpp
   - mkdir build && cd build
   - cmake ..
   - make clean && make

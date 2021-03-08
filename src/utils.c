@@ -63,7 +63,7 @@ int read_str_from_file(FILE *fp, char *str) {
 int init_song(FILE *fp, Song *current_song) {
     char current_str[MAX_STR_LENGTH];
     int read_data_from_file_condition = read_str_from_file(fp, current_str);
-    
+
     if (read_data_from_file_condition == EOF) {
         return EOF;
     }

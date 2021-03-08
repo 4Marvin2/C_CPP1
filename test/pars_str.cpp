@@ -1,3 +1,5 @@
+// Copyright 2021 Mikhail Popov
+
 #include "gtest/gtest.h"
 
 #define MAX_FIELD_LENGTH 101
@@ -9,24 +11,21 @@ extern "C" {
 #include "utils/utils.h"
 }
 
-class TestPars : public ::testing::Test
-{
-protected:
-	void SetUp()
-	{
-		ptr = new char*[NUMBER_OF_FIELDS];
-        for(int i = 0; i < NUMBER_OF_FIELDS; i++) {
+class TestPars : public ::testing::Test {
+ protected:
+    void SetUp() {
+        ptr = new char*[NUMBER_OF_FIELDS];
+        for (int i = 0; i < NUMBER_OF_FIELDS; i++) {
             ptr[i] = new char[MAX_FIELD_LENGTH];
         }
-	}
-	void TearDown()
-	{
-		for(int i = 0; i < NUMBER_OF_FIELDS; i++) {
+    }
+    void TearDown() {
+        for (int i = 0; i < NUMBER_OF_FIELDS; i++) {
             delete []ptr[i];
         }
         delete []ptr;
-	}
-	char **ptr;
+    }
+    char **ptr;
 };
 
 TEST_F(TestPars, correct_pars) {
