@@ -1,8 +1,7 @@
 dist:     focal
 sudo:     required  # используем Virtual Machine (а не Docker container)
 
-language: c         # на практике разницы между специфичным для C++ окружением
-                    # и, скажем, python -- никакой. Но пусть будет cpp.
+language: c
 
 compiler:
     - gcc
@@ -16,3 +15,4 @@ script:
   - mkdir build && cd build
   - cmake ..
   - make clean && make
+  - valgrind --tool=memcheck --leak-check=full ./test/tests_tests
