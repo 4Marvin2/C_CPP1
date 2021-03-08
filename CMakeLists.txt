@@ -5,6 +5,15 @@ set (PROJECT HW1)
 project (${PROJECT})
 
 ##
+### Coverage definitions ###
+##
+set(CMAKE_C_FLAGS "-pedantic -fprofile-arcs -ftest-coverage")
+set(CMAKE_CXX_FLAGS "-pedantic -fprofile-arcs -ftest-coverage")
+##
+### Coverage definitions ###
+##
+
+##
 ### Test definitions ###
 ##
 configure_file(CMakeLists.txt.in
