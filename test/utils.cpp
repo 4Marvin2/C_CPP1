@@ -9,7 +9,7 @@ TEST(utils, ok) {
     for(int i = 0; i < 4; i++) {
         ptr[i] = new char[101];
     }
-    char *str = "VTSS;VTSS;Atlantyda;1:30";
+    char str[25] = "VTSS;VTSS;Atlantyda;1:30";
 
     ASSERT_EQ(pars_str(str, ';', ptr), 4);
 
@@ -24,7 +24,7 @@ TEST(utils, not_ok) {
     for(int i = 0; i < 4; i++) {
         ptr[i] = new char[101];
     }
-    char *str = "VTSS;VTSS;Atlantyda";
+    char str[25] = "VTSS;VTSS;Atlantyda";
 
     ASSERT_EQ(pars_str(str, ';', ptr), 3);
 
