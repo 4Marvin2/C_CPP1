@@ -1,4 +1,18 @@
-#include "utils.h"
+#include "utils/utils.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_FIELD_LENGTH 101
+#define NUMBER_OF_FIELDS 4
+#define MAX_STR_LENGTH MAX_FIELD_LENGTH * NUMBER_OF_FIELDS + 4 // + 4 - знаки разделители и конец строки/перевод строки
+#define INCREASING_THE_ARRAY 2
+#define MIN_ARRAY_SIZE 2
+
+#define ERROR_EMPTY_LINE 1
+#define FILE_OPEN_ERROR -1
+#define ERROR_EMPTY_ARRAY -2
 
 int pars_str(char *str, char sep, char **result) {
     int i = 0;

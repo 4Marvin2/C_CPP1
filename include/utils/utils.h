@@ -1,17 +1,9 @@
+#ifndef INCLUDE_UTILS_UTILS_H_
+#define INCLUDE_UTILS_UTILS_H_
+
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #define MAX_FIELD_LENGTH 101
-#define NUMBER_OF_FIELDS 4
-#define MAX_STR_LENGTH MAX_FIELD_LENGTH * NUMBER_OF_FIELDS + 4 // + 4 - знаки разделители и конец строки/перевод строки
-#define INCREASING_THE_ARRAY 2
-#define MIN_ARRAY_SIZE 2
-
-#define ERROR_EMPTY_LINE 1
-#define ERROR_WRONG_NUMBER_OF_VARIABLE_IN_LINE 2
-#define FILE_OPEN_ERROR -1
-#define ERROR_EMPTY_ARRAY -2
 
 typedef struct Song {
     char author[MAX_FIELD_LENGTH];
@@ -37,3 +29,5 @@ int search_by_author(Song *all_songs, int songs_count, char *my_author, Song **r
 
 // печать песен
 void print_songs(Song *my_song_list, int songs_count);
+
+#endif  // INCLUDE_UTILS_UTILS_H_
