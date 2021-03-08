@@ -39,19 +39,36 @@ int pars_str(char *str, char sep, char **result) {
         i++;
     }
     result[j][k] = '\0';
+    if (strncmp(result[j], "", MAX_FIELD_LENGTH) == 0) {
+        recorded_values_number--;
+    }
 
     recorded_values_number++;
 
     return recorded_values_number;
 }
 
-int init_song(FILE *fp, Song *current_song) {
-    char current_str[MAX_STR_LENGTH];
-    if (fgets(current_str, MAX_STR_LENGTH, fp) == NULL) {
+int read_str_from_file(FILE *fp, char *str) {
+    if (fgets(str, MAX_STR_LENGTH, fp) == NULL) {
         return EOF;
     }
 
-    if ((current_str[0] == '\n') || (current_str[0] == '\0')) {
+    if (str[0] == '\n') {
+        return ERROR_EMPTY_LINE;
+    }
+
+    return 0;
+}
+
+int init_song(FILE *fp, Song *current_song) {
+    char current_str[MAX_STR_LENGTH];
+    int read_data_from_file_condition = read_str_from_file(fp, current_str);
+    
+    if (read_data_from_file_condition == EOF) {
+        return EOF;
+    }
+
+    if (read_data_from_file_condition == ERROR_EMPTY_LINE) {
         return ERROR_EMPTY_LINE;
     }
 

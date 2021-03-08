@@ -15,6 +15,9 @@ typedef struct Song {
 // парсер строк
 int pars_str(char *str, char sep, char **result);
 
+// чтение строки из файла
+int read_str_from_file(FILE *fp, char *str);
+
 // инициализация песни
 int init_song(FILE *fp, Song *current_song);
 
