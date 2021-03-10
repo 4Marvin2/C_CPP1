@@ -66,7 +66,7 @@ int main() {
         printf("%s\n", "Ошибка: не удалось выделить память под массив нужных песен");
         return NULL_PTR;
     }
-    
+
     if (songs_count == ERROR_EMPTY_ARRAY) {
         printf("%s\n", "Песен данного автора не найдено");
     }

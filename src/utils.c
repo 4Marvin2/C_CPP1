@@ -107,7 +107,7 @@ int realloc_array(Song **arr, int size) {
     if (size == 0) {
         return NULL_SIZE;
     }
-    Song *temp_arr = (Song *)malloc(sizeof(Song) * size * INCREASING_THE_ARRAY);
+    Song *temp_arr = malloc(sizeof(Song) * size * INCREASING_THE_ARRAY);
     if (temp_arr ==  NULL) {
         return NULL_PTR_REALLOC;
     }
