@@ -16,8 +16,7 @@ script:
   - mkdir build && cd build
   - cmake ..
   - make clean && make
-  - valgrind --tool=memcheck --leak-check=full ./test/pars_str_tests
-  - valgrind --tool=memcheck --leak-check=full ./test/read_str_from_file_tests
+  - valgrind --tool=memcheck --leak-check=full ./test/utils_tests
 
 after_success:
     - bash <(curl -s https://codecov.io/bash)

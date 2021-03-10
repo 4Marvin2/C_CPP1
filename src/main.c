@@ -17,20 +17,39 @@
 #define ERROR_WRONG_NUMBER_OF_VARIABLE_IN_LINE 2
 #define FILE_OPEN_ERROR -1
 #define ERROR_EMPTY_ARRAY -2
+#define NULL_PTR -3
+#define NULL_PTR_REALLOC -4
+#define NULL_SIZE_REALLOC -6
 
 int main() {
     // считываем данные из файла
     char file_name[] = "songs_data.txt";
-    Song *all_songs;
+    Song *all_songs = NULL;
     int songs_count = read_data_from_file(file_name, &all_songs);
 
     if (songs_count == FILE_OPEN_ERROR) {
         printf("%s\n", "Ошибка чтения файла");
-        return 0;
+        return FILE_OPEN_ERROR;
     }
+
+    if (songs_count == NULL_PTR) {
+        printf("%s\n", "Ошибка: не удалось выделить память под массив песен");
+        return NULL_PTR;
+    }
+
+    if (songs_count == NULL_PTR_REALLOC) {
+        printf("%s\n", "Ошибка: не удалось выделить память под расширенный массив");
+        return NULL_PTR_REALLOC;
+    }
+
+    if (songs_count == NULL_SIZE_REALLOC) {
+        printf("%s\n", "Ошибка: не удалось выделить память под расширенный массив");
+        return NULL_SIZE_REALLOC;
+    }
+
     if (songs_count == ERROR_EMPTY_ARRAY) {
         printf("%s\n", "Ошибка: файл не содержит информации");
-        return 0;
+        return ERROR_EMPTY_ARRAY;
     }
 
     // вводим автора, по которому будем осуществлять поиск
@@ -40,21 +59,28 @@ int main() {
     scanf("%100s", my_author);
 
     // находим нужные песни
-    Song *right_songs;
-    int right_songs_count = search_by_author(all_songs,
-                                             songs_count,
-                                             my_author,
-                                             &right_songs);
+    Song *right_songs = NULL;
+    int right_songs_count = search_by_author(all_songs, songs_count, my_author, &right_songs);
 
+    if (songs_count == NULL_PTR) {
+        printf("%s\n", "Ошибка: не удалось выделить память под массив нужных песен");
+        return NULL_PTR;
+    }
+    
     if (songs_count == ERROR_EMPTY_ARRAY) {
         printf("%s\n", "Песен данного автора не найдено");
     }
 
     // выводим нужные песни
-    print_songs(right_songs, right_songs_count);
+    print_songs(right_songs, right_songs_count, stdout);
 
-    free(all_songs);
-    free(right_songs);
+    if (all_songs != NULL) {
+        free(all_songs);
+    }
+
+    if (right_songs != NULL) {
+        free(right_songs);
+    }
 
     return 0;
 }

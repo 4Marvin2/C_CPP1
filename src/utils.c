@@ -17,6 +17,10 @@
 #define ERROR_WRONG_NUMBER_OF_VARIABLE_IN_LINE 2
 #define FILE_OPEN_ERROR -1
 #define ERROR_EMPTY_ARRAY -2
+#define NULL_PTR -3
+#define NULL_PTR_REALLOC -4
+#define NULL_SIZE -5
+#define NULL_SIZE_REALLOC -6
 
 int pars_str(char *str, char sep, char **result) {
     int i = 0;
@@ -100,12 +104,18 @@ int init_song(FILE *fp, Song *current_song) {
 }
 
 int realloc_array(Song **arr, int size) {
-    Song *temp_arr = malloc(sizeof(Song) * size * INCREASING_THE_ARRAY);
+    if (size == 0) {
+        return NULL_SIZE;
+    }
+    Song *temp_arr = (Song *)malloc(sizeof(Song) * size * INCREASING_THE_ARRAY);
+    if (temp_arr ==  NULL) {
+        return NULL_PTR_REALLOC;
+    }
     // перекопируем
     memcpy(temp_arr, (*arr), sizeof(Song) * size);
     free(*arr);
     // переназначаем изначальный массив
-    *arr = temp_arr;
+    (*arr) = temp_arr;
     size *= INCREASING_THE_ARRAY;
 
     return size;
@@ -120,6 +130,10 @@ int read_data_from_file(char name[], Song **my_songs_list) {
     Song current_song;
     int all_songs_count = MIN_ARRAY_SIZE;
     Song *all_songs = malloc(sizeof(Song) * all_songs_count);
+    if (all_songs == NULL) {
+        fclose(fp);
+        return NULL_PTR;
+    }
     int added_songs_count = 0;
     int init_song_condition = init_song(fp, &current_song);
     while (init_song_condition != EOF) {
@@ -129,6 +143,16 @@ int read_data_from_file(char name[], Song **my_songs_list) {
             // если достигли конца массива, то расширяем
             if (added_songs_count == all_songs_count) {
                 all_songs_count = realloc_array(&all_songs, all_songs_count);
+                if (all_songs_count == NULL_PTR) {
+                    free(all_songs);
+                    fclose(fp);
+                    return NULL_PTR_REALLOC;
+                }
+                if (all_songs_count == NULL_SIZE) {
+                    free(all_songs);
+                    fclose(fp);
+                    return NULL_SIZE_REALLOC;
+                }
             }
         }
 
@@ -137,21 +161,23 @@ int read_data_from_file(char name[], Song **my_songs_list) {
 
     fclose(fp);
 
-    *my_songs_list = all_songs;
-
     if (added_songs_count == 0) {
         free(all_songs);
         return ERROR_EMPTY_ARRAY;
     }
 
+    *my_songs_list = all_songs;
+
+
+
     return added_songs_count;
 }
 
-int search_by_author(Song *all_songs,
-                     int songs_count,
-                     char *my_author,
-                     Song **right_songs) {
+int search_by_author(Song *all_songs, int songs_count, char *my_author, Song **right_songs) {
     Song *result = malloc(sizeof(Song) * MIN_ARRAY_SIZE);
+    if (result == NULL) {
+        return NULL_PTR;
+    }
     int added_songs_count = 0;
     int all_songs_count = MIN_ARRAY_SIZE;
     for (int i = 0; i < songs_count; i++) {
@@ -161,23 +187,33 @@ int search_by_author(Song *all_songs,
             // если достигли конца массива, то расширяем
             if (all_songs_count == added_songs_count) {
                 all_songs_count = realloc_array(&result, all_songs_count);
+                if (all_songs_count == NULL_PTR) {
+                    free(result);
+                    return NULL_PTR_REALLOC;
+                }
+                if (all_songs_count == NULL_SIZE) {
+                    free(result);
+                    return NULL_SIZE_REALLOC;
+                }
             }
         }
     }
-
-    *right_songs = result;
 
     if (added_songs_count == 0) {
         free(result);
         return ERROR_EMPTY_ARRAY;
     }
 
+    *right_songs = result;
+
+
+
     return added_songs_count;
 }
 
-void print_songs(Song *my_song_list, int songs_count) {
+void print_songs(Song *my_song_list, int songs_count, FILE *stream) {
     for (int i = 0; i < songs_count; i++) {
-        printf("%s: %s | %s: %s | %s: %s | %s: %s\n",
+        fprintf(stream, "%s: %s | %s: %s | %s: %s | %s: %s\n",
         "Автор", my_song_list[i].author,
         "Исполнитель", my_song_list[i].singer,
         "Название", my_song_list[i].name,
