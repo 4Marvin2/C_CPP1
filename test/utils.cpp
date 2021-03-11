@@ -20,6 +20,7 @@
 #define NULL_PTR_REALLOC -4
 #define NULL_SIZE -5
 #define NULL_SIZE_REALLOC -6
+#define ERROR_PRINT -7
 
 extern "C" {
 #include "utils/utils.h"
@@ -376,6 +377,10 @@ TEST_F(TestPrintSongs, correct_ouput) {
     ASSERT_STREQ(correct_str2, current_str2);
 }
 
+TEST_F(TestPrintSongs, invalid_ouput) {
+    ASSERT_EQ(ERROR_PRINT, print_songs(all_songs, MIN_ARRAY_SIZE, stdin));
+}
+
 // тесты read_data_from_file
 
 class TestReadDataFile : public ::testing::Test {
@@ -487,6 +492,13 @@ TEST_F(TestReadDataFile, correct_reading5) {
 
 TEST_F(TestReadDataFile, failed_no_file) {
     ASSERT_EQ(FILE_OPEN_ERROR, read_data_from_file(file_name, &all_songs));
+}
+
+TEST_F(TestReadDataFile, failed_empty_array) {
+    std::ofstream out(file_name);
+    out.close();
+
+    ASSERT_EQ(ERROR_EMPTY_ARRAY, read_data_from_file(file_name, &all_songs));
 }
 
 // как поймать возврат NULL от malloc

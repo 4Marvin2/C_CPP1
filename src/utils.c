@@ -21,6 +21,7 @@
 #define NULL_PTR_REALLOC -4
 #define NULL_SIZE -5
 #define NULL_SIZE_REALLOC -6
+#define ERROR_PRINT -7
 
 int pars_str(char *str, char sep, char **result) {
     int i = 0;
@@ -211,12 +212,14 @@ int search_by_author(Song *all_songs, int songs_count, char *my_author, Song **r
     return added_songs_count;
 }
 
-void print_songs(Song *my_song_list, int songs_count, FILE *stream) {
+int print_songs(Song *my_song_list, int songs_count, FILE *stream) {
     for (int i = 0; i < songs_count; i++) {
-        fprintf(stream, "%s: %s | %s: %s | %s: %s | %s: %s\n",
-        "Автор", my_song_list[i].author,
-        "Исполнитель", my_song_list[i].singer,
-        "Название", my_song_list[i].name,
-        "Длительность", my_song_list[i].duration);
+        if ((fprintf(stream, "%s: %s | %s: %s | %s: %s | %s: %s\n",
+             "Автор", my_song_list[i].author,
+             "Исполнитель", my_song_list[i].singer,
+             "Название", my_song_list[i].name,
+             "Длительность", my_song_list[i].duration)) < 0 ) {
+                return ERROR_PRINT;
+            }
     }
 }

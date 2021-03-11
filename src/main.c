@@ -20,6 +20,7 @@
 #define NULL_PTR -3
 #define NULL_PTR_REALLOC -4
 #define NULL_SIZE_REALLOC -6
+#define ERROR_PRINT -7
 
 int main() {
     // считываем данные из файла
@@ -69,10 +70,14 @@ int main() {
 
     if (songs_count == ERROR_EMPTY_ARRAY) {
         printf("%s\n", "Песен данного автора не найдено");
+        return ERROR_EMPTY_ARRAY;
     }
 
     // выводим нужные песни
-    print_songs(right_songs, right_songs_count, stdout);
+    if (print_songs(right_songs, right_songs_count, stdout) == ERROR_PRINT) {
+        printf("%s\n", "Ошибка: не удалось напечатать песни");
+        return ERROR_PRINT;
+    }
 
     if (all_songs != NULL) {
         free(all_songs);

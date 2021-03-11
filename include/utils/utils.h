@@ -31,6 +31,6 @@ int read_data_from_file(char name[], Song **my_songs_list);
 int search_by_author(Song *all_songs, int songs_count, char *my_author, Song **right_songs);
 
 // печать песен
-void print_songs(Song *my_song_list, int songs_count, FILE *stream);
+int print_songs(Song *my_song_list, int songs_count, FILE *stream);
 
 #endif  // INCLUDE_UTILS_UTILS_H_
