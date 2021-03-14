@@ -24,6 +24,17 @@
 #define ERROR_PRINT -7
 
 extern int pars_str(char *str, char sep, char **result) {
+    if (str == NULL) {
+        return NULL_PTR;
+    }
+    if (result == NULL) {
+        return NULL_PTR;
+    }
+    for (int i = 0; i < NUMBER_OF_FIELDS; i++) {
+        if (result[i] == NULL) {
+            return NULL_PTR;
+        }
+    }
     int i = 0;
     int j = 0;
     int k = 0;
@@ -54,6 +65,12 @@ extern int pars_str(char *str, char sep, char **result) {
 }
 
 int read_str_from_file(FILE *fp, char *str) {
+    if (fp == NULL) {
+        return FILE_OPEN_ERROR;
+    }
+    if (str == NULL) {
+        return NULL_PTR;
+    }
     if (fgets(str, MAX_STR_LENGTH, fp) == NULL) {
         return EOF;
     }
@@ -66,8 +83,18 @@ int read_str_from_file(FILE *fp, char *str) {
 }
 
 int init_song(FILE *fp, Song *current_song) {
+    if (fp == NULL) {
+        return FILE_OPEN_ERROR;
+    }
+    if (current_song == NULL) {
+        return NULL_PTR;
+    }
     char current_str[MAX_STR_LENGTH];
     int read_data_from_file_condition = read_str_from_file(fp, current_str);
+
+    if (read_data_from_file_condition == NULL_PTR) {
+        return NULL_PTR;
+    }
 
     if (read_data_from_file_condition == EOF) {
         return EOF;
@@ -83,6 +110,11 @@ int init_song(FILE *fp, Song *current_song) {
     }
 
     int recorded_values_number = pars_str(current_str, ';', parsed_str);
+
+    if (recorded_values_number == NULL_PTR) {
+        return NULL_PTR;
+    }
+
     if (recorded_values_number != NUMBER_OF_FIELDS) {
         for (int i = 0; i < NUMBER_OF_FIELDS; i++) {
             free(parsed_str[i]);
@@ -105,6 +137,9 @@ int init_song(FILE *fp, Song *current_song) {
 }
 
 int realloc_array(Song **arr, int size) {
+    if (arr == NULL) {
+        return NULL_PTR;
+    }
     if (size == 0) {
         return NULL_SIZE;
     }
@@ -127,6 +162,10 @@ int read_data_from_file(char name[], Song **my_songs_list) {
     if ((fp = fopen(name, "r")) == NULL) {
         return FILE_OPEN_ERROR;
     }
+    if (my_songs_list == NULL) {
+        fclose(fp);
+        return NULL_PTR;
+    }
 
     Song current_song;
     int all_songs_count = MIN_ARRAY_SIZE;
@@ -145,6 +184,11 @@ int read_data_from_file(char name[], Song **my_songs_list) {
             if (added_songs_count == all_songs_count) {
                 all_songs_count = realloc_array(&all_songs, all_songs_count);
                 if (all_songs_count == NULL_PTR) {
+                    free(all_songs);
+                    fclose(fp);
+                    return NULL_PTR;
+                }
+                if (all_songs_count == NULL_PTR_REALLOC) {
                     free(all_songs);
                     fclose(fp);
                     return NULL_PTR_REALLOC;
@@ -175,6 +219,12 @@ int read_data_from_file(char name[], Song **my_songs_list) {
 }
 
 int search_by_author(Song *all_songs, int songs_count, char *my_author, Song **right_songs) {
+    if (all_songs == NULL) {
+        return NULL_PTR;
+    }
+    if (my_author == NULL) {
+        return NULL_PTR;
+    }
     Song *result = (Song *)malloc(sizeof(Song) * MIN_ARRAY_SIZE);
     if (result == NULL) {
         return NULL_PTR;
@@ -189,6 +239,10 @@ int search_by_author(Song *all_songs, int songs_count, char *my_author, Song **r
             if (all_songs_count == added_songs_count) {
                 all_songs_count = realloc_array(&result, all_songs_count);
                 if (all_songs_count == NULL_PTR) {
+                    free(result);
+                    return NULL_PTR;
+                }
+                if (all_songs_count == NULL_PTR_REALLOC) {
                     free(result);
                     return NULL_PTR_REALLOC;
                 }
@@ -213,6 +267,12 @@ int search_by_author(Song *all_songs, int songs_count, char *my_author, Song **r
 }
 
 int print_songs(Song *my_song_list, int songs_count, FILE *stream) {
+    if (my_song_list == NULL) {
+        return NULL_PTR;
+    }
+    if (stream == NULL) {
+        return NULL_PTR;
+    }
     for (int i = 0; i < songs_count; i++) {
         if ((fprintf(stream, "%s: %s | %s: %s | %s: %s | %s: %s\n",
              "Автор", my_song_list[i].author,

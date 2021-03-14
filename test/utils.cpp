@@ -43,10 +43,23 @@ class TestInitSong : public ::testing::Test {
             fclose(fp);
         }
     }
-    FILE *fp;
+    FILE *fp = NULL;
     Song current_song, correct_song;
     char file_name[11] = "./test.txt";
 };
+
+TEST_F(TestInitSong, null_ptr1) {
+    ASSERT_EQ(FILE_OPEN_ERROR, init_song(NULL, &current_song));
+}
+
+TEST_F(TestInitSong, null_ptr2) {
+    std::ofstream out(file_name);
+    out << "VTSS;VTSS;Atlantyda;1:30";
+    out.close();
+    fp = fopen(file_name, "r");
+
+    ASSERT_EQ(NULL_PTR, init_song(fp, NULL));
+}
 
 TEST_F(TestInitSong, correct_init1) {
     std::ofstream out(file_name);
@@ -236,6 +249,24 @@ class TestPars : public ::testing::Test {
     char **ptr;
 };
 
+TEST_F(TestPars, null_ptr1) {
+    ASSERT_EQ(NULL_PTR, pars_str(NULL, ';', ptr));
+}
+
+TEST_F(TestPars, null_ptr2) {
+    char str[MAX_STR_LENGTH] = "VTSS;VTSS;Atlantyda;1:30";
+
+    ASSERT_EQ(NULL_PTR, pars_str(str, ';', NULL));
+}
+
+TEST_F(TestPars, null_ptr3) {
+    char str[MAX_STR_LENGTH] = "VTSS;VTSS;Atlantyda;1:30";
+    delete []ptr[0];
+    ptr[0] = NULL;
+
+    ASSERT_EQ(NULL_PTR, pars_str(str, ';', ptr));
+}
+
 TEST_F(TestPars, correct_pars1) {
     char str[MAX_STR_LENGTH] = "VTSS;VTSS;Atlantyda;1:30";
 
@@ -382,6 +413,14 @@ TEST_F(TestPrintSongs, invalid_ouput) {
     ASSERT_EQ(ERROR_PRINT, print_songs(all_songs, MIN_ARRAY_SIZE, stdin));
 }
 
+TEST_F(TestPrintSongs, null_ptr1) {
+    ASSERT_EQ(NULL_PTR, print_songs(NULL, MIN_ARRAY_SIZE, stdin));
+}
+
+TEST_F(TestPrintSongs, null_ptr2) {
+    ASSERT_EQ(NULL_PTR, print_songs(all_songs, MIN_ARRAY_SIZE, NULL));
+}
+
 // тесты read_data_from_file
 
 class TestReadDataFile : public ::testing::Test {
@@ -413,6 +452,14 @@ class TestReadDataFile : public ::testing::Test {
     Song *all_songs = NULL, *correct_all_songs;
     char file_name[11] = "./test.txt";
 };
+
+TEST_F(TestReadDataFile, null_ptr1) {
+    std::ofstream out(file_name);
+    out << "VTSS;VTSS;Atlantyda;1:30";
+    out.close();
+
+    ASSERT_EQ(NULL_PTR, read_data_from_file(file_name, NULL));
+}
 
 TEST_F(TestReadDataFile, correct_reading1) {
     std::ofstream out(file_name);
@@ -502,9 +549,6 @@ TEST_F(TestReadDataFile, failed_empty_array) {
     ASSERT_EQ(ERROR_EMPTY_ARRAY, read_data_from_file(file_name, &all_songs));
 }
 
-// как поймать возврат NULL от malloc
-
-
 // тесты read_str_from_file
 
 class TestReadStr : public ::testing::Test {
@@ -515,9 +559,24 @@ class TestReadStr : public ::testing::Test {
             fclose(fp);
         }
     }
-    FILE *fp;
+    FILE *fp = NULL;
     char file_name[11] = "./test.txt";
 };
+
+TEST_F(TestReadStr, null_ptr1) {
+    char current_str[MAX_STR_LENGTH];
+
+    ASSERT_EQ(FILE_OPEN_ERROR, read_str_from_file(NULL, current_str));
+}
+
+TEST_F(TestReadStr, null_ptr2) {
+    std::ofstream out(file_name);
+    out << "VTSS;VTSS;Atlantyda;1:30";
+    out.close();
+    fp = fopen(file_name, "r");
+
+    ASSERT_EQ(NULL_PTR, read_str_from_file(fp, NULL));
+}
 
 TEST_F(TestReadStr, correct_reading) {
     char current_str[MAX_STR_LENGTH];
@@ -558,7 +617,6 @@ TEST_F(TestReadStr, eof) {
 
     ASSERT_EQ(EOF, read_str_from_file(fp, current_str));
 }
-
 
 // тесты realloc_array
 
@@ -607,8 +665,9 @@ TEST_F(TestReallocArr, invalid_size) {
     ASSERT_EQ(NULL_SIZE, realloc_array(&arr, 0));
 }
 
-// как поймать возврат NULL от malloc
-
+TEST_F(TestReallocArr, null_ptr1) {
+    ASSERT_EQ(NULL_PTR, realloc_array(NULL, MIN_ARRAY_SIZE));
+}
 
 // тесты search_by_author
 
@@ -654,5 +713,13 @@ TEST_F(TestSearchAuthor, correct_searching1) {
 }
 
 TEST_F(TestSearchAuthor, invalid_searching) {
-    EXPECT_EQ(ERROR_EMPTY_ARRAY, search_by_author(all_songs, MIN_ARRAY_SIZE, another_author, &right_songs));
+    ASSERT_EQ(ERROR_EMPTY_ARRAY, search_by_author(all_songs, MIN_ARRAY_SIZE, another_author, &right_songs));
+}
+
+TEST_F(TestSearchAuthor, null_ptr1) {
+    ASSERT_EQ(NULL_PTR, search_by_author(NULL, MIN_ARRAY_SIZE, another_author, &right_songs));
+}
+
+TEST_F(TestSearchAuthor, null_ptr2) {
+    ASSERT_EQ(NULL_PTR, search_by_author(all_songs, MIN_ARRAY_SIZE, NULL, &right_songs));
 }
