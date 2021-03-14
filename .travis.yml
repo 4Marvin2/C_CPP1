@@ -12,8 +12,8 @@ install:
     - sudo apt install cppcheck
 
 script:
-  - cpplint --extensions=c include/*/* src/*
-  - cpplint --extensions=cpp test/*.cpp
+#   - cpplint --extensions=c include/*/* src/*
+#   - cpplint --extensions=cpp test/*.cpp
   - cppcheck --inconclusive --enable=all --language=c src/*.c
   - mkdir build && cd build
   - cmake ..

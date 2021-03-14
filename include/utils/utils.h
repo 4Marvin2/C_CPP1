@@ -12,18 +12,6 @@ typedef struct Song {
     char duration[MAX_FIELD_LENGTH];
 } Song;
 
-// парсер строк
-int pars_str(char *str, char sep, char **result);
-
-// чтение строки из файла
-int read_str_from_file(FILE *fp, char *str);
-
-// инициализация песни
-int init_song(FILE *fp, Song *current_song);
-
-// пересоздание массива большего размера
-int realloc_array(Song **arr, int size);
-
 // считывание песен из файла
 int read_data_from_file(char name[], Song **my_songs_list);
 

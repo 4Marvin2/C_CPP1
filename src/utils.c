@@ -23,7 +23,7 @@
 #define NULL_SIZE_REALLOC -6
 #define ERROR_PRINT -7
 
-int pars_str(char *str, char sep, char **result) {
+extern int pars_str(char *str, char sep, char **result) {
     int i = 0;
     int j = 0;
     int k = 0;
@@ -77,9 +77,9 @@ int init_song(FILE *fp, Song *current_song) {
         return ERROR_EMPTY_LINE;
     }
 
-    char **parsed_str = malloc(sizeof(char *) * NUMBER_OF_FIELDS);
+    char **parsed_str = (char **)malloc(sizeof(char *) * NUMBER_OF_FIELDS);
     for (int i = 0; i < NUMBER_OF_FIELDS; i++) {
-        parsed_str[i] = malloc(sizeof(char) * MAX_FIELD_LENGTH);
+        parsed_str[i] = (char *)malloc(sizeof(char) * MAX_FIELD_LENGTH);
     }
 
     int recorded_values_number = pars_str(current_str, ';', parsed_str);
@@ -108,7 +108,7 @@ int realloc_array(Song **arr, int size) {
     if (size == 0) {
         return NULL_SIZE;
     }
-    Song *temp_arr = malloc(sizeof(Song) * size * INCREASING_THE_ARRAY);
+    Song *temp_arr = (Song *)malloc(sizeof(Song) * size * INCREASING_THE_ARRAY);
     if (temp_arr ==  NULL) {
         return NULL_PTR_REALLOC;
     }
@@ -130,7 +130,7 @@ int read_data_from_file(char name[], Song **my_songs_list) {
 
     Song current_song;
     int all_songs_count = MIN_ARRAY_SIZE;
-    Song *all_songs = malloc(sizeof(Song) * all_songs_count);
+    Song *all_songs = (Song *)malloc(sizeof(Song) * all_songs_count);
     if (all_songs == NULL) {
         fclose(fp);
         return NULL_PTR;
@@ -175,7 +175,7 @@ int read_data_from_file(char name[], Song **my_songs_list) {
 }
 
 int search_by_author(Song *all_songs, int songs_count, char *my_author, Song **right_songs) {
-    Song *result = malloc(sizeof(Song) * MIN_ARRAY_SIZE);
+    Song *result = (Song *)malloc(sizeof(Song) * MIN_ARRAY_SIZE);
     if (result == NULL) {
         return NULL_PTR;
     }
@@ -222,4 +222,6 @@ int print_songs(Song *my_song_list, int songs_count, FILE *stream) {
                 return ERROR_PRINT;
             }
     }
+
+    return 0;
 }

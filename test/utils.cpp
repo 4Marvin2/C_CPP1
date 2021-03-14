@@ -24,6 +24,7 @@
 
 extern "C" {
 #include "utils/utils.h"
+#include "../src/utils.c"
 }
 
 // тесты init_song
