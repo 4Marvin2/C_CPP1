@@ -61,7 +61,7 @@ TEST_F(TestInitSong, null_ptr2) {
     ASSERT_EQ(NULL_PTR, init_song(fp, NULL));
 }
 
-TEST_F(TestInitSong, correct_init1) {
+TEST_F(TestInitSong, correct_str_without_enter) {
     std::ofstream out(file_name);
     out << "VTSS;VTSS;Atlantyda;1:30";
     out.close();
@@ -75,7 +75,7 @@ TEST_F(TestInitSong, correct_init1) {
     ASSERT_STREQ(correct_song.duration, current_song.duration);
 }
 
-TEST_F(TestInitSong, correct_init2) {
+TEST_F(TestInitSong, correct_str_with_enter) {
     std::ofstream out(file_name);
     out << "VTSS;VTSS;Atlantyda;1:30\n";
     out.close();
@@ -89,7 +89,7 @@ TEST_F(TestInitSong, correct_init2) {
     ASSERT_STREQ(correct_song.duration, current_song.duration);
 }
 
-TEST_F(TestInitSong, invalid_str1) {
+TEST_F(TestInitSong, three_elements_string_ending_with_separator) {
     std::ofstream out(file_name);
     out << "VTSS;VTSS;Atlantyda;";
     out.close();
@@ -98,7 +98,7 @@ TEST_F(TestInitSong, invalid_str1) {
     ASSERT_EQ(ERROR_WRONG_NUMBER_OF_VARIABLE_IN_LINE, init_song(fp, &current_song));
 }
 
-TEST_F(TestInitSong, invalid_str2) {
+TEST_F(TestInitSong, three_elements_string_ending_without_separator) {
     std::ofstream out(file_name);
     out << "VTSS;VTSS;Atlantyda";
     out.close();
@@ -107,7 +107,7 @@ TEST_F(TestInitSong, invalid_str2) {
     ASSERT_EQ(ERROR_WRONG_NUMBER_OF_VARIABLE_IN_LINE, init_song(fp, &current_song));
 }
 
-TEST_F(TestInitSong, invalid_str3) {
+TEST_F(TestInitSong, three_elements_string_with_gap_in_the_middle_with_separator) {
     std::ofstream out(file_name);
     out << "VTSS;VTSS;;1:30";
     out.close();
@@ -116,7 +116,7 @@ TEST_F(TestInitSong, invalid_str3) {
     ASSERT_EQ(ERROR_WRONG_NUMBER_OF_VARIABLE_IN_LINE, init_song(fp, &current_song));
 }
 
-TEST_F(TestInitSong, invalid_str4) {
+TEST_F(TestInitSong, three_elements_string_with_gap_in_the_middle_without_separator) {
     std::ofstream out(file_name);
     out << "VTSS;VTSS;1:30";
     out.close();
@@ -125,7 +125,7 @@ TEST_F(TestInitSong, invalid_str4) {
     ASSERT_EQ(ERROR_WRONG_NUMBER_OF_VARIABLE_IN_LINE, init_song(fp, &current_song));
 }
 
-TEST_F(TestInitSong, invalid_str5) {
+TEST_F(TestInitSong, three_elements_string_ending_separator_and_enter) {
     std::ofstream out(file_name);
     out << "VTSS;VTSS;Atlantyda;\n";
     out.close();
@@ -134,7 +134,7 @@ TEST_F(TestInitSong, invalid_str5) {
     ASSERT_EQ(ERROR_WRONG_NUMBER_OF_VARIABLE_IN_LINE, init_song(fp, &current_song));
 }
 
-TEST_F(TestInitSong, invalid_str6) {
+TEST_F(TestInitSong, three_elements_string_ending_enter) {
     std::ofstream out(file_name);
     out << "VTSS;VTSS;Atlantyda\n";
     out.close();
@@ -143,7 +143,7 @@ TEST_F(TestInitSong, invalid_str6) {
     ASSERT_EQ(ERROR_WRONG_NUMBER_OF_VARIABLE_IN_LINE, init_song(fp, &current_song));
 }
 
-TEST_F(TestInitSong, invalid_str7) {
+TEST_F(TestInitSong, three_elements_string_with_gap_in_the_middle_with_separator_ending_with_enter) {
     std::ofstream out(file_name);
     out << "VTSS;VTSS;;1:30\n";
     out.close();
@@ -152,7 +152,7 @@ TEST_F(TestInitSong, invalid_str7) {
     ASSERT_EQ(ERROR_WRONG_NUMBER_OF_VARIABLE_IN_LINE, init_song(fp, &current_song));
 }
 
-TEST_F(TestInitSong, invalid_str8) {
+TEST_F(TestInitSong, three_elements_string_with_gap_in_the_middle_without_separator_ending_with_enter) {
     std::ofstream out(file_name);
     out << "VTSS;VTSS;1:30\n";
     out.close();
@@ -161,7 +161,7 @@ TEST_F(TestInitSong, invalid_str8) {
     ASSERT_EQ(ERROR_WRONG_NUMBER_OF_VARIABLE_IN_LINE, init_song(fp, &current_song));
 }
 
-TEST_F(TestInitSong, invalid_str9) {
+TEST_F(TestInitSong, empy_str) {
     std::ofstream out(file_name);
     out << "";
     out.close();
@@ -170,7 +170,7 @@ TEST_F(TestInitSong, invalid_str9) {
     ASSERT_EQ(EOF, init_song(fp, &current_song));
 }
 
-TEST_F(TestInitSong, invalid_str10) {
+TEST_F(TestInitSong, no_str) {
     std::ofstream out(file_name);
     out.close();
     fp = fopen(file_name, "r");
@@ -178,7 +178,7 @@ TEST_F(TestInitSong, invalid_str10) {
     ASSERT_EQ(EOF, init_song(fp, &current_song));
 }
 
-TEST_F(TestInitSong, invalid_str11) {
+TEST_F(TestInitSong, string_from_enter) {
     std::ofstream out(file_name);
     out << "\n";
     out.close();
@@ -267,7 +267,7 @@ TEST_F(TestPars, null_ptr3) {
     ASSERT_EQ(NULL_PTR, pars_str(str, ';', ptr));
 }
 
-TEST_F(TestPars, correct_pars1) {
+TEST_F(TestPars, correct_str_ending_without_enter) {
     char str[MAX_STR_LENGTH] = "VTSS;VTSS;Atlantyda;1:30";
 
     ASSERT_EQ(4, pars_str(str, ';', ptr));
@@ -276,7 +276,7 @@ TEST_F(TestPars, correct_pars1) {
     }
 }
 
-TEST_F(TestPars, correct_pars2) {
+TEST_F(TestPars, correct_str_ending_with_enter) {
     char str[MAX_STR_LENGTH] = "VTSS;VTSS;Atlantyda;1:30\n";
 
     ASSERT_EQ(4, pars_str(str, ';', ptr));
@@ -285,7 +285,7 @@ TEST_F(TestPars, correct_pars2) {
     }
 }
 
-TEST_F(TestPars, invalid_string1) {
+TEST_F(TestPars, three_elements_string_ending_with_separator_and_enter) {
     char str[MAX_STR_LENGTH] = "VTSS;VTSS;Atlantyda;\n";
 
     ASSERT_EQ(3, pars_str(str, ';', ptr));
@@ -294,7 +294,7 @@ TEST_F(TestPars, invalid_string1) {
     }
 }
 
-TEST_F(TestPars, invalid_string2) {
+TEST_F(TestPars, three_elements_string_ending_with_enter) {
     char str[MAX_STR_LENGTH] = "VTSS;VTSS;Atlantyda\n";
 
     ASSERT_EQ(3, pars_str(str, ';', ptr));
@@ -303,7 +303,7 @@ TEST_F(TestPars, invalid_string2) {
     }
 }
 
-TEST_F(TestPars, invalid_string3) {
+TEST_F(TestPars, three_elements_string_ending_with_separator) {
     char str[MAX_STR_LENGTH] = "VTSS;VTSS;Atlantyda;";
 
     ASSERT_EQ(3, pars_str(str, ';', ptr));
@@ -312,7 +312,7 @@ TEST_F(TestPars, invalid_string3) {
     }
 }
 
-TEST_F(TestPars, invalid_string4) {
+TEST_F(TestPars, three_elements_string_ending_without_separator) {
     char str[MAX_STR_LENGTH] = "VTSS;VTSS;Atlantyda";
 
     ASSERT_EQ(3, pars_str(str, ';', ptr));
@@ -321,7 +321,7 @@ TEST_F(TestPars, invalid_string4) {
     }
 }
 
-TEST_F(TestPars, invalid_string5) {
+TEST_F(TestPars, three_elements_string_with_gap_in_the_middle_with_separator) {
     char str[MAX_STR_LENGTH] = "VTSS;VTSS;;1:30";
 
     ASSERT_EQ(3, pars_str(str, ';', ptr));
@@ -330,7 +330,7 @@ TEST_F(TestPars, invalid_string5) {
     }
 }
 
-TEST_F(TestPars, invalid_string6) {
+TEST_F(TestPars, three_elements_string_with_gap_in_the_middle_with_separator_ending_with_enter) {
     char str[MAX_STR_LENGTH] = "VTSS;VTSS;;1:30\n";
 
     ASSERT_EQ(3, pars_str(str, ';', ptr));
@@ -340,7 +340,7 @@ TEST_F(TestPars, invalid_string6) {
     }
 }
 
-TEST_F(TestPars, invalid_string7) {
+TEST_F(TestPars, three_elements_string_with_gap_in_the_middle_without_separator) {
     char str[MAX_STR_LENGTH] = "VTSS;VTSS;1:30";
 
     ASSERT_EQ(3, pars_str(str, ';', ptr));
@@ -349,7 +349,7 @@ TEST_F(TestPars, invalid_string7) {
     }
 }
 
-TEST_F(TestPars, invalid_string8) {
+TEST_F(TestPars, three_elements_string_with_gap_in_the_middle_without_separator_ending_with_enter) {
     char str[MAX_STR_LENGTH] = "VTSS;VTSS;1:30\n";
 
     ASSERT_EQ(3, pars_str(str, ';', ptr));
@@ -358,7 +358,7 @@ TEST_F(TestPars, invalid_string8) {
     }
 }
 
-TEST_F(TestPars, invalid_string9) {
+TEST_F(TestPars, empty_str) {
     char str[MAX_STR_LENGTH] = "";
 
     ASSERT_EQ(0, pars_str(str, ';', ptr));
@@ -461,7 +461,7 @@ TEST_F(TestReadDataFile, null_ptr1) {
     ASSERT_EQ(NULL_PTR, read_data_from_file(file_name, NULL));
 }
 
-TEST_F(TestReadDataFile, correct_reading1) {
+TEST_F(TestReadDataFile, correct_str) {
     std::ofstream out(file_name);
     out << "VTSS;VTSS;Atlantyda;1:30";
     out.close();
@@ -473,7 +473,7 @@ TEST_F(TestReadDataFile, correct_reading1) {
     ASSERT_STREQ(correct_all_songs[0].duration, all_songs[0].duration);
 }
 
-TEST_F(TestReadDataFile, correct_reading2) {
+TEST_F(TestReadDataFile, correct_str_ending_with_enter) {
     std::ofstream out(file_name);
     out << "VTSS;VTSS;Atlantyda;1:30\n";
     out.close();
@@ -485,7 +485,7 @@ TEST_F(TestReadDataFile, correct_reading2) {
     ASSERT_STREQ(correct_all_songs[0].duration, all_songs[0].duration);
 }
 
-TEST_F(TestReadDataFile, correct_reading3) {
+TEST_F(TestReadDataFile, correct_two_str) {
     std::ofstream out(file_name);
     out << "VTSS;VTSS;Atlantyda;1:30\n";
     out << "VTSS;VTSS;Atlantyda;1:30";
@@ -502,7 +502,7 @@ TEST_F(TestReadDataFile, correct_reading3) {
     ASSERT_STREQ(correct_all_songs[1].duration, all_songs[1].duration);
 }
 
-TEST_F(TestReadDataFile, correct_reading4) {
+TEST_F(TestReadDataFile, correct_two_str_with_a_gap_enter) {
     std::ofstream out(file_name);
     out << "VTSS;VTSS;Atlantyda;1:30\n";
     out << "\n";
@@ -520,7 +520,7 @@ TEST_F(TestReadDataFile, correct_reading4) {
     ASSERT_STREQ(correct_all_songs[1].duration, all_songs[1].duration);
 }
 
-TEST_F(TestReadDataFile, correct_reading5) {
+TEST_F(TestReadDataFile, correct_two_str_with_a_gap_enter_in_begin) {
     std::ofstream out(file_name);
     out << "\n";
     out << "VTSS;VTSS;Atlantyda;1:30\n";
@@ -589,7 +589,7 @@ TEST_F(TestReadStr, correct_reading) {
     ASSERT_STREQ("VTSS;VTSS;Atlantyda;1:30", current_str);
 }
 
-TEST_F(TestReadStr, empty_line1) {
+TEST_F(TestReadStr, enter_line) {
     char current_str[MAX_STR_LENGTH];
     std::ofstream out(file_name);
     out << "\n";
@@ -599,7 +599,7 @@ TEST_F(TestReadStr, empty_line1) {
     ASSERT_EQ(ERROR_EMPTY_LINE, read_str_from_file(fp, current_str));
 }
 
-TEST_F(TestReadStr, empty_line2) {
+TEST_F(TestReadStr, empty_line) {
     char current_str[MAX_STR_LENGTH];
     std::ofstream out(file_name);
     out << "";
@@ -704,7 +704,7 @@ class TestSearchAuthor : public ::testing::Test {
     char another_author[10] = "VCL";
 };
 
-TEST_F(TestSearchAuthor, correct_searching1) {
+TEST_F(TestSearchAuthor, correct_searching) {
     ASSERT_EQ(1, search_by_author(all_songs, MIN_ARRAY_SIZE, my_author, &right_songs));
     ASSERT_STREQ(correct_right_songs[0].author, right_songs[0].author);
     ASSERT_STREQ(correct_right_songs[0].singer, right_songs[0].singer);

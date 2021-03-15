@@ -1,8 +1,5 @@
 include_directories("${PROJECT_SOURCE_DIR}/include")
 
-# file(GLOB sources "${PROJECT_SOURCE_DIR}/src/*.c")
-# list(REMOVE_ITEM sources "${PROJECT_SOURCE_DIR}/src/main.c")
-
 file(GLOB tests "${PROJECT_SOURCE_DIR}/test/*.cpp")
 list(REMOVE_ITEM tests "${PROJECT_SOURCE_DIR}/test/main.cpp")
 
