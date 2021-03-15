@@ -11,16 +11,19 @@
 #define MAX_STR_LENGTH MAX_FIELD_LENGTH * NUMBER_OF_FIELDS + 4
 #define INCREASING_THE_ARRAY 2
 #define MIN_ARRAY_SIZE 2
+#define MAX_ERROR_STR_LENGTH 200
+#define RANDOM_NUMBER 42
 
 #define ERROR_EMPTY_LINE 1
 #define ERROR_WRONG_NUMBER_OF_VARIABLE_IN_LINE 2
 #define FILE_OPEN_ERROR -1
-#define ERROR_EMPTY_ARRAY -2
+#define ERROR_EMPTY_FILE -2
 #define NULL_PTR -3
 #define NULL_PTR_REALLOC -4
 #define NULL_SIZE -5
 #define NULL_SIZE_REALLOC -6
 #define ERROR_PRINT -7
+#define ERROR_EMPTY_ARRAY -8
 
 extern "C" {
 #include "utils/utils.h"
@@ -400,7 +403,7 @@ class TestPrintSongs : public ::testing::Test {
     char correct_str2[113] = "Автор: Yaeji | Исполнитель: Yaeji | Название: Raingirl | Длительность: 2:00\n";
 };
 
-TEST_F(TestPrintSongs, correct_ouput) {
+TEST_F(TestPrintSongs, correct_output) {
     print_songs(all_songs, MIN_ARRAY_SIZE, fp);
     fseek(fp, 0, SEEK_SET);
     fgets(current_str1, 112, fp);
@@ -409,7 +412,7 @@ TEST_F(TestPrintSongs, correct_ouput) {
     ASSERT_STREQ(correct_str2, current_str2);
 }
 
-TEST_F(TestPrintSongs, invalid_ouput) {
+TEST_F(TestPrintSongs, invalid_output) {
     ASSERT_EQ(ERROR_PRINT, print_songs(all_songs, MIN_ARRAY_SIZE, stdin));
 }
 
@@ -443,9 +446,7 @@ class TestReadDataFile : public ::testing::Test {
     }
     void TearDown() {
         remove(file_name);
-        if (all_songs != NULL) {
-            free(all_songs);
-        }
+        free(all_songs);
         free(correct_all_songs);
     }
     Song song1, song2;
@@ -542,11 +543,11 @@ TEST_F(TestReadDataFile, failed_no_file) {
     ASSERT_EQ(FILE_OPEN_ERROR, read_data_from_file(file_name, &all_songs));
 }
 
-TEST_F(TestReadDataFile, failed_empty_array) {
+TEST_F(TestReadDataFile, failed_empty_file) {
     std::ofstream out(file_name);
     out.close();
 
-    ASSERT_EQ(ERROR_EMPTY_ARRAY, read_data_from_file(file_name, &all_songs));
+    ASSERT_EQ(ERROR_EMPTY_FILE, read_data_from_file(file_name, &all_songs));
 }
 
 // тесты read_str_from_file
@@ -692,9 +693,7 @@ class TestSearchAuthor : public ::testing::Test {
         correct_right_songs[0] = song2;
     }
     void TearDown() {
-        if (right_songs != NULL) {
-            free(right_songs);
-        }
+        free(right_songs);
         free(correct_right_songs);
         free(all_songs);
     }
@@ -722,4 +721,56 @@ TEST_F(TestSearchAuthor, null_ptr1) {
 
 TEST_F(TestSearchAuthor, null_ptr2) {
     ASSERT_EQ(NULL_PTR, search_by_author(all_songs, MIN_ARRAY_SIZE, NULL, &right_songs));
+}
+
+// тесты error_decoding
+
+class TestErrorDecoding : public ::testing::Test {
+ protected:
+    void TearDown() {
+        free(decoding_str);
+    }
+    char *decoding_str;
+};
+
+TEST_F(TestErrorDecoding, file_open_error) {
+    int songs_count = FILE_OPEN_ERROR;
+    decoding_str = error_decoding(songs_count);
+    ASSERT_STREQ("Ошибка чтения файла", decoding_str);
+}
+
+TEST_F(TestErrorDecoding, null_ptr) {
+    int songs_count = NULL_PTR;
+    decoding_str = error_decoding(songs_count);
+    ASSERT_STREQ("Ошибка: не удалось выделить память под массив песен", decoding_str);
+}
+
+TEST_F(TestErrorDecoding, null_ptr_realloc) {
+    int songs_count = NULL_PTR_REALLOC;
+    decoding_str = error_decoding(songs_count);
+    ASSERT_STREQ("Ошибка: не удалось выделить память под расширенный массив", decoding_str);
+}
+
+TEST_F(TestErrorDecoding, null_size_realloc) {
+    int songs_count = NULL_SIZE_REALLOC;
+    decoding_str = error_decoding(songs_count);
+    ASSERT_STREQ("Ошибка: не верный размер массива под расширенный массив", decoding_str);
+}
+
+TEST_F(TestErrorDecoding, error_empty_line) {
+    int songs_count = ERROR_EMPTY_FILE;
+    decoding_str = error_decoding(songs_count);
+    ASSERT_STREQ("Ошибка: файл не содержит информации", decoding_str);
+}
+
+TEST_F(TestErrorDecoding, error_empty_array) {
+    int songs_count = ERROR_EMPTY_ARRAY;
+    decoding_str = error_decoding(songs_count);
+    ASSERT_STREQ("Песен данного автора не найдено", decoding_str);
+}
+
+TEST_F(TestErrorDecoding, no_valid_error) {
+    int songs_count = RANDOM_NUMBER;
+    decoding_str = error_decoding(songs_count);
+    ASSERT_STREQ("Не верный код ошибки", decoding_str);
 }

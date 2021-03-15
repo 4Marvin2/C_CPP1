@@ -21,4 +21,7 @@ int search_by_author(Song *all_songs, int songs_count, char *my_author, Song **r
 // печать песен
 int print_songs(Song *my_song_list, int songs_count, FILE *stream);
 
+// по коду ошибки возвращает ее описание
+char* error_decoding(int error_code);
+
 #endif  // INCLUDE_UTILS_UTILS_H_
