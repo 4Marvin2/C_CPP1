@@ -196,7 +196,7 @@ int read_data_from_file(char name[], Song **my_songs_list) {
                 if (all_songs_count < 0) {
                     free(all_songs);
                     fclose(fp);
-                    return all_songs_count; // возврат кода ошибки
+                    return all_songs_count;  // возврат кода ошибки
                 }
             }
         }
@@ -237,7 +237,7 @@ int search_by_author(Song *all_songs, int songs_count, char *my_author, Song **r
                 all_songs_count = realloc_array(&result, all_songs_count);
                 if (all_songs_count < 0) {
                     free(result);
-                    return all_songs_count; // возврат кода ошибки
+                    return all_songs_count;  // возврат кода ошибки
                 }
             }
         }

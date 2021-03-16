@@ -5,7 +5,7 @@
 
 #include "gtest/gtest.h"
 
-#define RANDOM_NUMBER 42 // для проверки некорректного кода ошибки
+#define RANDOM_NUMBER 42  // для проверки некорректного кода ошибки
 
 extern "C" {
 #include "utils/utils.h"
