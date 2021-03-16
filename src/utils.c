@@ -94,18 +94,10 @@ int init_song(FILE *fp, Song *current_song) {
         return NULL_PTR;
     }
     char current_str[MAX_STR_LENGTH];
-    int read_data_from_file_condition = read_str_from_file(fp, current_str);
+    int read_str_from_file_condition = read_str_from_file(fp, current_str);
 
-    if (read_data_from_file_condition == NULL_PTR) {
-        return NULL_PTR;
-    }
-
-    if (read_data_from_file_condition == EOF) {
-        return EOF;
-    }
-
-    if (read_data_from_file_condition == ERROR_EMPTY_LINE) {
-        return ERROR_EMPTY_LINE;
+    if (read_str_from_file_condition != CORRECT_EXIT) {
+        return read_str_from_file_condition;  // возвращаем код ошибки
     }
 
     char **parsed_str = (char **)malloc(sizeof(char *) * NUMBER_OF_FIELDS);
@@ -213,8 +205,6 @@ int read_data_from_file(char name[], Song **my_songs_list) {
 
     *my_songs_list = all_songs;
 
-
-
     return added_songs_count;
 }
 
@@ -249,8 +239,6 @@ int search_by_author(Song *all_songs, int songs_count, char *my_author, Song **r
     }
 
     *right_songs = result;
-
-
 
     return added_songs_count;
 }
