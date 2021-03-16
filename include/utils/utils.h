@@ -5,6 +5,8 @@
 
 #define MAX_FIELD_LENGTH 101
 
+#define ERROR_PRINT -6
+
 typedef struct Song {
     char author[MAX_FIELD_LENGTH];
     char singer[MAX_FIELD_LENGTH];

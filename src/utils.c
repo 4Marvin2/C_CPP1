@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_FIELD_LENGTH 101
 #define NUMBER_OF_FIELDS 4
 // + 4 - знаки разделители и конец строки/перевод строки
 #define MAX_STR_LENGTH MAX_FIELD_LENGTH * NUMBER_OF_FIELDS + 4
@@ -18,13 +17,18 @@
 #define ERROR_EMPTY_LINE 1
 #define ERROR_WRONG_NUMBER_OF_VARIABLE_IN_LINE 2
 #define FILE_OPEN_ERROR -1
+#define FILE_OPEN_ERROR_STR "Ошибка чтения файла"
 #define ERROR_EMPTY_FILE -2
+#define ERROR_EMPTY_FILE_STR "Ошибка: файл не содержит информации"
 #define NULL_PTR -3
+#define NULL_PTR_STR "Ошибка: не удалось выделить память под массив песен"
 #define NULL_PTR_REALLOC -4
-#define NULL_SIZE -5
-#define NULL_SIZE_REALLOC -6
-#define ERROR_PRINT -7
-#define ERROR_EMPTY_ARRAY -8
+#define NULL_PTR_REALLOC_STR "Ошибка: не удалось выделить память под расширенный массив"
+#define NULL_SIZE_REALLOC -5
+#define NULL_SIZE_REALLOC_STR "Ошибка: не верный размер массива под расширенный массив"
+#define ERROR_EMPTY_ARRAY -7
+#define ERROR_EMPTY_ARRAY_STR "Песен данного автора не найдено"
+#define INCORRECT_ERROR_CODE_STR "Не верный код ошибки"
 
 int pars_str(char *str, char sep, char **result) {
     if (!str || !result) {
@@ -147,7 +151,7 @@ int realloc_array(Song **arr, int size) {
         return NULL_PTR;
     }
     if (size == 0) {
-        return NULL_SIZE;
+        return NULL_SIZE_REALLOC;
     }
     Song *temp_arr = (Song *)malloc(sizeof(Song) * size * INCREASING_THE_ARRAY);
     if (temp_arr ==  NULL) {
@@ -189,20 +193,10 @@ int read_data_from_file(char name[], Song **my_songs_list) {
             // если достигли конца массива, то расширяем
             if (added_songs_count == all_songs_count) {
                 all_songs_count = realloc_array(&all_songs, all_songs_count);
-                if (all_songs_count == NULL_PTR) {
+                if (all_songs_count < 0) {
                     free(all_songs);
                     fclose(fp);
-                    return NULL_PTR;
-                }
-                if (all_songs_count == NULL_PTR_REALLOC) {
-                    free(all_songs);
-                    fclose(fp);
-                    return NULL_PTR_REALLOC;
-                }
-                if (all_songs_count == NULL_SIZE) {
-                    free(all_songs);
-                    fclose(fp);
-                    return NULL_SIZE_REALLOC;
+                    return all_songs_count; // возврат кода ошибки
                 }
             }
         }
@@ -225,10 +219,7 @@ int read_data_from_file(char name[], Song **my_songs_list) {
 }
 
 int search_by_author(Song *all_songs, int songs_count, char *my_author, Song **right_songs) {
-    if (all_songs == NULL) {
-        return NULL_PTR;
-    }
-    if (my_author == NULL) {
+    if ((all_songs == NULL) || (my_author == NULL)) {
         return NULL_PTR;
     }
     Song *result = (Song *)malloc(sizeof(Song) * MIN_ARRAY_SIZE);
@@ -244,17 +235,9 @@ int search_by_author(Song *all_songs, int songs_count, char *my_author, Song **r
             // если достигли конца массива, то расширяем
             if (all_songs_count == added_songs_count) {
                 all_songs_count = realloc_array(&result, all_songs_count);
-                if (all_songs_count == NULL_PTR) {
+                if (all_songs_count < 0) {
                     free(result);
-                    return NULL_PTR;
-                }
-                if (all_songs_count == NULL_PTR_REALLOC) {
-                    free(result);
-                    return NULL_PTR_REALLOC;
-                }
-                if (all_songs_count == NULL_SIZE) {
-                    free(result);
-                    return NULL_SIZE_REALLOC;
+                    return all_songs_count; // возврат кода ошибки
                 }
             }
         }
@@ -273,10 +256,7 @@ int search_by_author(Song *all_songs, int songs_count, char *my_author, Song **r
 }
 
 int print_songs(Song *my_song_list, int songs_count, FILE *stream) {
-    if (my_song_list == NULL) {
-        return NULL_PTR;
-    }
-    if (stream == NULL) {
+    if ((my_song_list == NULL) || (stream == NULL)) {
         return NULL_PTR;
     }
     for (int i = 0; i < songs_count; i++) {
@@ -296,25 +276,25 @@ char* error_decoding(int error_code) {
     char *decoding_str = (char *)malloc(sizeof(char) * MAX_ERROR_STR_LENGTH);
     switch (error_code) {
         case FILE_OPEN_ERROR:
-            strncpy(decoding_str, "Ошибка чтения файла", MAX_ERROR_STR_LENGTH);
+            strncpy(decoding_str, FILE_OPEN_ERROR_STR, MAX_ERROR_STR_LENGTH);
             return decoding_str;
         case NULL_PTR:
-            strncpy(decoding_str, "Ошибка: не удалось выделить память под массив песен", MAX_ERROR_STR_LENGTH);
+            strncpy(decoding_str, NULL_PTR_STR, MAX_ERROR_STR_LENGTH);
             return decoding_str;
         case NULL_PTR_REALLOC:
-            strncpy(decoding_str, "Ошибка: не удалось выделить память под расширенный массив", MAX_ERROR_STR_LENGTH);
+            strncpy(decoding_str, NULL_PTR_REALLOC_STR, MAX_ERROR_STR_LENGTH);
             return decoding_str;
         case NULL_SIZE_REALLOC:
-            strncpy(decoding_str, "Ошибка: не верный размер массива под расширенный массив", MAX_ERROR_STR_LENGTH);
+            strncpy(decoding_str, NULL_SIZE_REALLOC_STR, MAX_ERROR_STR_LENGTH);
             return decoding_str;
         case ERROR_EMPTY_FILE:
-            strncpy(decoding_str, "Ошибка: файл не содержит информации", MAX_ERROR_STR_LENGTH);
+            strncpy(decoding_str, ERROR_EMPTY_FILE_STR, MAX_ERROR_STR_LENGTH);
             return decoding_str;
         case ERROR_EMPTY_ARRAY:
-            strncpy(decoding_str, "Песен данного автора не найдено", MAX_ERROR_STR_LENGTH);
+            strncpy(decoding_str, ERROR_EMPTY_ARRAY_STR, MAX_ERROR_STR_LENGTH);
             return decoding_str;
         default:
-            strncpy(decoding_str, "Не верный код ошибки", MAX_ERROR_STR_LENGTH);
+            strncpy(decoding_str, INCORRECT_ERROR_CODE_STR, MAX_ERROR_STR_LENGTH);
             return decoding_str;
     }
 }

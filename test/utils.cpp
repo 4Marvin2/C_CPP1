@@ -5,25 +5,7 @@
 
 #include "gtest/gtest.h"
 
-#define MAX_FIELD_LENGTH 101
-#define NUMBER_OF_FIELDS 4
-// + 4 - знаки разделители и конец строки/перевод строки
-#define MAX_STR_LENGTH MAX_FIELD_LENGTH * NUMBER_OF_FIELDS + 4
-#define INCREASING_THE_ARRAY 2
-#define MIN_ARRAY_SIZE 2
-#define MAX_ERROR_STR_LENGTH 200
-#define RANDOM_NUMBER 42
-
-#define ERROR_EMPTY_LINE 1
-#define ERROR_WRONG_NUMBER_OF_VARIABLE_IN_LINE 2
-#define FILE_OPEN_ERROR -1
-#define ERROR_EMPTY_FILE -2
-#define NULL_PTR -3
-#define NULL_PTR_REALLOC -4
-#define NULL_SIZE -5
-#define NULL_SIZE_REALLOC -6
-#define ERROR_PRINT -7
-#define ERROR_EMPTY_ARRAY -8
+#define RANDOM_NUMBER 42 // для проверки некорректного кода ошибки
 
 extern "C" {
 #include "utils/utils.h"
@@ -663,7 +645,7 @@ TEST_F(TestReallocArr, correct_realloc) {
 }
 
 TEST_F(TestReallocArr, invalid_size) {
-    ASSERT_EQ(NULL_SIZE, realloc_array(&arr, 0));
+    ASSERT_EQ(NULL_SIZE_REALLOC, realloc_array(&arr, 0));
 }
 
 TEST_F(TestReallocArr, null_ptr1) {
