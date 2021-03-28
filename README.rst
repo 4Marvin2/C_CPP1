@@ -2,6 +2,8 @@ C_CPP2
 ======
 .. image:: https://travis-ci.com/4Marvin2/C_CPP1.svg?branch=dev2
     :target: https://travis-ci.com/4Marvin2/C_CPP1
+.. image:: https://codecov.io/gh/4Marvin2/C_CPP1/branch/dev2/graph/badge.svg?token=G8N9PF0Z2A
+    :target: https://codecov.io/gh/4Marvin2/C_CPP1
 Второе индивидуальное задание по курсу "Углубленное программирование на C/C++
 -----------------------------------------------------------------------------
 

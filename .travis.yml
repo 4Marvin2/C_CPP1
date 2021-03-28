@@ -1,4 +1,3 @@
-
 dist:     focal
 sudo:     required
 
@@ -13,8 +12,13 @@ install:
     - sudo apt install cppcheck
 
 script:
-  - cpplint --extensions=c include/*/* src/*/*
-  - cppcheck --inconclusive --enable=all --language=c src/*
-  - mkdir build && cd build
-  - cmake ..
-  - make clean && make
+    - cpplint --extensions=c include/*/* src/*/*
+    - cpplint --extensions=cpp test/*.cpp
+    - cppcheck --inconclusive --enable=all --language=c src/*
+    - mkdir build && cd build
+    - cmake ..
+    - make clean && make
+    - valgrind --tool=memcheck --leak-check=full ./test/serial_utils_tests
+
+after_success:
+    - bash <(curl -s https://codecov.io/bash)

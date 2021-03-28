@@ -6,6 +6,28 @@ project (${PROJECT})
 
 find_package(Threads REQUIRED)
 
+##
+### Test definitions ###
+##
+configure_file(CMakeLists.txt.in
+        googletest-download/CMakeLists.txt)
+execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+execute_process(COMMAND ${CMAKE_COMMAND} --build .
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+
+add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
+        ${CMAKE_BINARY_DIR}/googletest-build)
+
+enable_testing()
+add_subdirectory(test)
+##
+### Test definitions ###
+##
+
+##
+### Source definitions ###
+##
 set(INC_DIR ${PROJECT_SOURCE_DIR}/include)
 set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
 
@@ -24,3 +46,6 @@ add_executable(HW2 ${SRC_DIR}/main.c)
 target_link_libraries(HW2 Threads::Threads pthread most_frequent_seqence_serial most_frequent_seqence_parallel)
 
 target_include_directories(HW2 PUBLIC ${INC_DIR})
+##
+### Source definitions ###
+##

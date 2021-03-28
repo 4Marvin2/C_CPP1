@@ -118,6 +118,8 @@ int search_first_occurrence_of_substring(char *arr, size_t size, int most_freque
         }
         previous = current;
     }
+
+    return NO_SUBSTRING;
 }
 
 int search_substring(char *arr, int first_position_of_substring, int most_frequent_length, char *result) {
@@ -130,7 +132,7 @@ int search_substring(char *arr, int first_position_of_substring, int most_freque
         j++;
     }
     result[j] = '\0';
-
+    
     return CORRECT;
 }
 
@@ -157,7 +159,7 @@ void free_resources(FILE *fp, char *first_arr, int *second_arr) {
 }
 
 int search_substring_of_the_most_common_length_serial(const char *filename, char **result) {
-    char *my_arr = (char *)malloc(sizeof(char) * 1);
+    char *my_arr = (char *)malloc(sizeof(char) * MIN_ARR_SIZE);
     if (my_arr == NULL) {
         return NULL_PTR;
     }
@@ -195,7 +197,7 @@ int search_substring_of_the_most_common_length_serial(const char *filename, char
     }
 
     int first_position_of_substring = search_first_occurrence_of_substring(my_arr, length, most_frequent_length);
-    if (first_position_of_substring == NULL_PTR) {
+    if (first_position_of_substring < 0) {
         free_resources(fp, my_arr, number_of_repeating_length);
         return first_position_of_substring;
     }
