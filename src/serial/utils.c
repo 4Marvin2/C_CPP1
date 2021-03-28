@@ -132,7 +132,7 @@ int search_substring(char *arr, int first_position_of_substring, int most_freque
         j++;
     }
     result[j] = '\0';
-    
+
     return CORRECT;
 }
 
