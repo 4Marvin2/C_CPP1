@@ -1,0 +1,20 @@
+
+dist:     focal
+sudo:     required
+
+language: c
+
+compiler:
+    - gcc
+
+install:
+    - sudo apt-get install valgrind
+    - sudo pip install cpplint
+    - sudo apt install cppcheck
+
+script:
+  - cpplint --extensions=c include/*/* src/*/*
+  - cppcheck --inconclusive --enable=all --language=c src/*
+  - mkdir build && cd build
+  - cmake ..
+  - make clean && make
