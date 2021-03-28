@@ -7,6 +7,15 @@ project (${PROJECT})
 find_package(Threads REQUIRED)
 
 ##
+### Coverage definitions ###
+##
+set(CMAKE_C_FLAGS "-pedantic -fprofile-arcs -ftest-coverage")
+set(CMAKE_CXX_FLAGS "-pedantic -fprofile-arcs -ftest-coverage")
+##
+### Coverage definitions ###
+##
+
+##
 ### Test definitions ###
 ##
 configure_file(CMakeLists.txt.in
