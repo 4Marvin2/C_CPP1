@@ -142,7 +142,7 @@ int finding_partition_of_arr_int(int *arr_splitting, int number_of_processes, co
         if (i == number_of_processes - 1) {
             arr_splitting[i] = size;
         } else {
-            mid = offset + ((size - 1 - offset) / number_of_free_processes);
+            mid = offset + ((size - offset) / number_of_free_processes);
             offset = mid;
             arr_splitting[i] = mid;
         }
@@ -259,6 +259,8 @@ int search_first_occurrence_of_substring(char *arr, size_t size, int most_freque
         }
         previous = current;
     }
+
+    return NO_SUBSTRING;
 }
 
 int search_substring(char *arr, int first_position_of_substring, int most_frequent_length, char *result) {
@@ -302,6 +304,7 @@ int free_main_resources(int fd, char *my_arr, int size, int *arr_counter, int *a
     if (munmap(arr_counter, size) != CORRECT) {
         return MUNMAP_FAILED;
     }
+    return CORRECT;
 }
 
 int search_substring_of_the_most_common_length_parallel(const char *filename, char **result) {
@@ -368,7 +371,7 @@ int search_substring_of_the_most_common_length_parallel(const char *filename, ch
     pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
     pthread_mutex_init(&mutex, &attr);
 
-    if (processes_number != -4) {
+    if (processes_number != PARENT_PID) {
         condition_of_function = search_number_of_repeating_length_parallel(my_arr,
                                                                            arr_splitting,
                                                                            arr_counter,
@@ -401,6 +404,8 @@ int search_substring_of_the_most_common_length_parallel(const char *filename, ch
             free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
             return condition_of_function;
         }
+
+        printf("%d " ,arr_counter[1]);
 
         condition_of_function = finding_partition_of_arr_int(arr_splitting_for_max,
                                                              number_of_processes,

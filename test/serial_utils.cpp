@@ -60,7 +60,7 @@ class TestInput : public ::testing::Test {
         }
     }
     char *arr, *correct_arr;
-    FILE *fp = NULL;
+    FILE *fp = nullptr;
     char file_name[11] = "./test.txt";
 };
 

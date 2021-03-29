@@ -22,7 +22,8 @@
 #define PARENT_PID -4
 #define OPEN_FILE_FAILED -5
 #define NULL_STREAM -6
-#define MUNMAP_FAILED -7
+#define MUNMAP_FAILED -8
+#define NO_SUBSTRING -7
 
 // нахождение подстроки самой часто встречаемой длины (параллельно)
 int search_substring_of_the_most_common_length_parallel(const char *filename, char **result);
