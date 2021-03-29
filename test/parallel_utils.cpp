@@ -268,7 +268,7 @@ TEST_F(TestSearchNumberOfRepeatingLengthParallel, corect_searching) {
             while (waitpid(pids[i], NULL, 0) > 0) {}
         }
         
-        for (int i = 0; i < size; i++) {
+        // for (int i = 0; i < size; i++) {
         //     std::cout << arr_counter[i] << " ";
             // ASSERT_EQ(correct_arr_counter[i], arr_counter[i]);
         // }

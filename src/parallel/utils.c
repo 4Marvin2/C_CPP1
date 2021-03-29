@@ -307,6 +307,130 @@ int free_main_resources(int fd, char *my_arr, int size, int *arr_counter, int *a
     return CORRECT;
 }
 
+int search_arr_of_repeating_length_parallel(int fd,
+                                            char *my_arr,
+                                            size_t size,
+                                            int *arr_counter,
+                                            int *arr_splitting,
+                                            int number_of_processes) {
+    pid_t *pids = (pid_t *)malloc(sizeof(pid_t) * number_of_processes);
+    if (pids == NULL) {
+        free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
+        return NULL_PTR;
+    }
+
+    int processes_number = create_forks(number_of_processes, pids);
+    if ((processes_number == NULL_PTR) || (processes_number == FORK_FAILED)) {
+        free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
+        if (processes_number == PARENT_PID) {
+            for (int i = 0; i < number_of_processes; i++) {
+                while (waitpid(pids[i], NULL, 0) > 0) {}
+            }
+        }
+        free(pids);
+        return processes_number;
+    }
+
+    pthread_mutexattr_t attr;
+    pthread_mutex_t mutex;
+    pthread_mutexattr_init(&attr);
+    pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
+    pthread_mutex_init(&mutex, &attr);
+
+    if (processes_number != PARENT_PID) {
+        int condition_of_function = search_number_of_repeating_length_parallel(my_arr,
+                                                                               arr_splitting,
+                                                                               arr_counter,
+                                                                               processes_number,
+                                                                               mutex);
+        if (condition_of_function != CORRECT) {
+            free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
+        }
+        free(pids);
+        pthread_mutexattr_destroy(&attr);
+        pthread_mutex_destroy(&mutex);
+        exit(0);
+    }
+
+    for (int i = 0; i < number_of_processes; i++) {
+        while (waitpid(pids[i], NULL, 0) > 0) {}
+    }
+
+    pthread_mutexattr_destroy(&attr);
+    pthread_mutex_destroy(&mutex);
+
+    free(pids);
+
+    return CORRECT;
+}
+
+int search_arr_max_parallel(int fd,
+                            char *my_arr,
+                            size_t size,
+                            int *arr_counter,
+                            int *arr_splitting,
+                            int *arr_max,
+                            int *arr_splitting_for_max,
+                            int number_of_processes) {
+    pid_t *pids = (pid_t *)malloc(sizeof(pid_t) * number_of_processes);
+    if (pids == NULL) {
+        free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
+        return NULL_PTR;
+    }
+
+    int processes_number = create_forks(number_of_processes, pids);
+    if ((processes_number == NULL_PTR) || (processes_number == FORK_FAILED)) {
+        free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
+        if (munmap(arr_max, number_of_processes) != CORRECT) {
+            return MUNMAP_FAILED;
+        }
+        if (munmap(arr_splitting_for_max, number_of_processes) != CORRECT) {
+            return MUNMAP_FAILED;
+        }
+        if (processes_number == PARENT_PID) {
+            for (int i = 0; i < number_of_processes; i++) {
+                while (waitpid(pids[i], NULL, 0) > 0) {}
+            }
+        }
+        free(pids);
+        return processes_number;
+    }
+
+    pthread_mutexattr_t attr;
+    pthread_mutex_t mutex;
+    pthread_mutexattr_init(&attr);
+    pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
+    pthread_mutex_init(&mutex, &attr);
+
+    if (processes_number != PARENT_PID) {
+        int condition_of_function = search_max_parallel(arr_max, arr_splitting_for_max, arr_counter, processes_number);
+        if (condition_of_function != CORRECT) {
+            free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
+            if (munmap(arr_max, number_of_processes) != CORRECT) {
+                return MUNMAP_FAILED;
+            }
+            if (munmap(arr_splitting_for_max, number_of_processes) != CORRECT) {
+                return MUNMAP_FAILED;
+            }
+        }
+        free(pids);
+        pthread_mutexattr_destroy(&attr);
+        pthread_mutex_destroy(&mutex);
+        exit(0);
+    }
+
+    for (int i = 0; i < number_of_processes; i++) {
+        while (waitpid(pids[i], NULL, 0) > 0) {}
+    }
+
+    pthread_mutexattr_destroy(&attr);
+    pthread_mutex_destroy(&mutex);
+
+    free(pids);
+
+    return CORRECT;
+}
+
 int search_substring_of_the_most_common_length_parallel(const char *filename, char **result) {
     char *my_arr = NULL;
     int fd = 0;
@@ -349,78 +473,66 @@ int search_substring_of_the_most_common_length_parallel(const char *filename, ch
         return condition_of_function;
     }
 
-    pid_t *pids = (pid_t *)malloc(sizeof(pid_t) * number_of_processes);
-    if (pids == NULL) {
+    search_arr_of_repeating_length_parallel(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
+
+    int *arr_max = NULL;
+    condition_of_function = create_shared_memory(&arr_max, number_of_processes);
+    if (condition_of_function != CORRECT) {
         free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-        return NULL_PTR;
-    }
-    int processes_number = create_forks(number_of_processes, pids);
-    if ((processes_number == NULL_PTR) || (processes_number == FORK_FAILED)) {
-        free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-        if (processes_number == PARENT_PID) {
-            for (int i = 0; i < number_of_processes; i++) {
-                while (waitpid(pids[i], NULL, 0) > 0) {}
-            }
-        }
-        return processes_number;
+        return condition_of_function;
     }
 
-    pthread_mutexattr_t attr;
-    pthread_mutex_t mutex;
-    pthread_mutexattr_init(&attr);
-    pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
-    pthread_mutex_init(&mutex, &attr);
+    int *arr_splitting_for_max = NULL;
+    condition_of_function = create_shared_memory(&arr_splitting_for_max, number_of_processes);
+    if (condition_of_function != CORRECT) {
+        free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
+        return condition_of_function;
+    }
 
-    if (processes_number != PARENT_PID) {
-        condition_of_function = search_number_of_repeating_length_parallel(my_arr,
-                                                                           arr_splitting,
-                                                                           arr_counter,
-                                                                           processes_number,
-                                                                           mutex);
-        if (condition_of_function != CORRECT) {
-            free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-            if (processes_number == PARENT_PID) {
-                for (int i = 0; i < number_of_processes; i++) {
-                    while (waitpid(pids[i], NULL, 0) > 0) {}
-                }
-            }
-            return condition_of_function;
+    condition_of_function = finding_partition_of_arr_int(arr_splitting_for_max,
+                                                         number_of_processes,
+                                                         arr_counter,
+                                                         size);
+
+    if (condition_of_function != CORRECT) {
+        free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
+        if (munmap(arr_max, number_of_processes) != CORRECT) {
+            return MUNMAP_FAILED;
         }
-    } else {
-        for (int i = 0; i < number_of_processes; i++) {
-            while (waitpid(pids[i], NULL, 0) > 0) {}
+        return condition_of_function;
+    }
+
+    search_arr_max_parallel(fd, my_arr, size, arr_counter, arr_splitting, arr_max, arr_splitting_for_max, number_of_processes);
+
+    int most_frequent_length = search_max(arr_max, number_of_processes);
+    if (most_frequent_length < 0) {
+        free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
+        if (munmap(arr_max, number_of_processes) != CORRECT) {
+            return MUNMAP_FAILED;
         }
-
-        int *arr_max = NULL;
-        condition_of_function = create_shared_memory(&arr_max, number_of_processes);
-        if (condition_of_function != CORRECT) {
-            free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-            return condition_of_function;
+        if (munmap(arr_splitting_for_max, number_of_processes) != CORRECT) {
+            return MUNMAP_FAILED;
         }
+        // free(pids);
+        return most_frequent_length;
+    }
 
-        int *arr_splitting_for_max = NULL;
-        condition_of_function = create_shared_memory(&arr_splitting_for_max, number_of_processes);
-        if (condition_of_function != CORRECT) {
-            free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-            return condition_of_function;
+    int first_position_of_substring = search_first_occurrence_of_substring(my_arr, size, most_frequent_length);
+    if (first_position_of_substring < 0) {
+        free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
+        if (munmap(arr_max, number_of_processes) != CORRECT) {
+            return MUNMAP_FAILED;
         }
-
-        printf("%d " ,arr_counter[1]);
-
-        condition_of_function = finding_partition_of_arr_int(arr_splitting_for_max,
-                                                             number_of_processes,
-                                                             arr_counter,
-                                                             size);
-        if (condition_of_function != CORRECT) {
-            free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-            if (munmap(arr_max, number_of_processes) != CORRECT) {
-                return MUNMAP_FAILED;
-            }
-            return condition_of_function;
+        if (munmap(arr_splitting_for_max, number_of_processes) != CORRECT) {
+            return MUNMAP_FAILED;
         }
+        // free(pids);
+        return first_position_of_substring;
+    }
 
-        processes_number = create_forks(number_of_processes, pids);
-        if ((processes_number == NULL_PTR) || (processes_number == FORK_FAILED)) {
+    if (*result == NULL) {
+        (*result) = (char *)malloc(sizeof(char) * (most_frequent_length + 1));
+        if (*result == NULL) {
             free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
             if (munmap(arr_max, number_of_processes) != CORRECT) {
                 return MUNMAP_FAILED;
@@ -428,126 +540,48 @@ int search_substring_of_the_most_common_length_parallel(const char *filename, ch
             if (munmap(arr_splitting_for_max, number_of_processes) != CORRECT) {
                 return MUNMAP_FAILED;
             }
-            if (processes_number == PARENT_PID) {
-                for (int i = 0; i < number_of_processes; i++) {
-                    while (waitpid(pids[i], NULL, 0) > 0) {}
-                }
-            }
-            return processes_number;
-        }
-        if (processes_number != -4) {
-            condition_of_function = search_max_parallel(arr_max, arr_splitting_for_max, arr_counter, processes_number);
-            if (condition_of_function != CORRECT) {
-                free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-                if (munmap(arr_max, number_of_processes) != CORRECT) {
-                    return MUNMAP_FAILED;
-                }
-                if (munmap(arr_splitting_for_max, number_of_processes) != CORRECT) {
-                    return MUNMAP_FAILED;
-                }
-                if (processes_number == PARENT_PID) {
-                    for (int i = 0; i < number_of_processes; i++) {
-                        while (waitpid(pids[i], NULL, 0) > 0) {}
-                    }
-                }
-                return condition_of_function;
-            }
-        } else {
-            for (int i = 0; i < number_of_processes; i++) {
-                while (waitpid(pids[i], NULL, 0) > 0) {}
-            }
-
-            int most_frequent_length = search_max(arr_max, number_of_processes);
-            if (most_frequent_length < 0) {
-                free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-                if (munmap(arr_max, number_of_processes) != CORRECT) {
-                    return MUNMAP_FAILED;
-                }
-                if (munmap(arr_splitting_for_max, number_of_processes) != CORRECT) {
-                    return MUNMAP_FAILED;
-                }
-                return most_frequent_length;
-            }
-
-            int first_position_of_substring = search_first_occurrence_of_substring(my_arr, size, most_frequent_length);
-            if (first_position_of_substring < 0) {
-                free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-                if (munmap(arr_max, number_of_processes) != CORRECT) {
-                    return MUNMAP_FAILED;
-                }
-                if (munmap(arr_splitting_for_max, number_of_processes) != CORRECT) {
-                    return MUNMAP_FAILED;
-                }
-                return first_position_of_substring;
-            }
-
-            if (*result == NULL) {
-                (*result) = (char *)malloc(sizeof(char) * (most_frequent_length + 1));
-                if (*result == NULL) {
-                    free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-                    if (munmap(arr_max, number_of_processes) != CORRECT) {
-                        return MUNMAP_FAILED;
-                    }
-                    if (munmap(arr_splitting_for_max, number_of_processes) != CORRECT) {
-                        return MUNMAP_FAILED;
-                    }
-                    return NULL_PTR;
-                }
-            }
-
-            condition_of_function = search_substring(my_arr,
-                                                     first_position_of_substring,
-                                                     most_frequent_length,
-                                                     *result);
-            if (condition_of_function != CORRECT) {
-                free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-                if (munmap(arr_max, number_of_processes) != CORRECT) {
-                    return MUNMAP_FAILED;
-                }
-                if (munmap(arr_splitting_for_max, number_of_processes) != CORRECT) {
-                    return MUNMAP_FAILED;
-                }
-                free(*result);
-                return condition_of_function;
-            }
-
-            condition_of_function = output(my_arr, first_position_of_substring, most_frequent_length, stdout);
-            if (condition_of_function != CORRECT) {
-                free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-                if (munmap(arr_max, number_of_processes) != CORRECT) {
-                    return MUNMAP_FAILED;
-                }
-                if (munmap(arr_splitting_for_max, number_of_processes) != CORRECT) {
-                    return MUNMAP_FAILED;
-                }
-                free(*result);
-                return condition_of_function;
-            }
-
-            if (munmap(arr_max, number_of_processes) != 0) {
-                printf("munmap failed\n");
-            }
-            if (munmap(arr_splitting_for_max, number_of_processes) != 0) {
-                printf("munmap failed\n");
-            }
-            if (munmap(arr_splitting, number_of_processes) != 0) {
-                printf("munmap failed\n");
-            }
-            if (munmap(arr_counter, size) != 0) {
-                printf("munmap failed\n");
-            }
-            if (munmap(my_arr, size - 1) != 0) {
-                printf("munmap failed\n");
-            }
+            return NULL_PTR;
         }
     }
 
-    pthread_mutexattr_destroy(&attr);
-    pthread_mutex_destroy(&mutex);
+    condition_of_function = search_substring(my_arr,
+                                             first_position_of_substring,
+                                             most_frequent_length,
+                                             *result);
 
-    free(pids);
+    if (condition_of_function != CORRECT) {
+        free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
+        if (munmap(arr_max, number_of_processes) != CORRECT) {
+            return MUNMAP_FAILED;
+        }
+        if (munmap(arr_splitting_for_max, number_of_processes) != CORRECT) {
+            return MUNMAP_FAILED;
+        }
+        free(*result);
+        return condition_of_function;
+    }
 
-    close(fd);
+    condition_of_function = output(my_arr, first_position_of_substring, most_frequent_length, stdout);
+    if (condition_of_function != CORRECT) {
+        free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
+        if (munmap(arr_max, number_of_processes) != CORRECT) {
+            return MUNMAP_FAILED;
+        }
+        if (munmap(arr_splitting_for_max, number_of_processes) != CORRECT) {
+            return MUNMAP_FAILED;
+        }
+        free(*result);
+        return condition_of_function;
+    }
 
-    return processes_number;
+    free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
+
+    if (munmap(arr_max, number_of_processes) != CORRECT) {
+        return MUNMAP_FAILED;
+    }
+    if (munmap(arr_splitting_for_max, number_of_processes) != CORRECT) {
+        return MUNMAP_FAILED;
+    }
+
+    return CORRECT;
 }
