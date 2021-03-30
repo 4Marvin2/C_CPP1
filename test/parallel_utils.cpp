@@ -32,7 +32,6 @@ TEST_F(TestCreateSharedFile, correct_createing_shared_file) {
     out.close();
 
     ASSERT_EQ(9, create_shared_file(file_name, &arr, fd));
-    
 }
 
 TEST_F(TestCreateSharedFile, null_arr) {
@@ -225,7 +224,6 @@ class TestSearchNumberOfRepeatingLengthParallel: public ::testing::Test {
             free_main_resources(fd, arr, size, arr_counter, arr_splitting, number_of_processes);
             remove(file_name);
         }
-        
     }
     int *pids = nullptr, *arr_splitting = nullptr, *arr_counter = nullptr, *correct_arr_counter = nullptr;
     char *arr = nullptr;
@@ -253,10 +251,11 @@ TEST_F(TestSearchNumberOfRepeatingLengthParallel, correct_searching) {
         pthread_mutex_destroy(&mutex);
         exit(EXIT_SUCCESS);
     }
+
     for (int i = 0; i < number_of_processes; i++) {
         while (int wait_status = waitpid(pids[i], NULL, 0) > 0) {}
     }
-    
+
     for (int i = 0; i < size; i++) {
         ASSERT_EQ(correct_arr_counter[i], arr_counter[i]);
     }
@@ -277,6 +276,7 @@ TEST_F(TestSearchNumberOfRepeatingLengthParallel, null_char_arr) {
         pthread_mutex_destroy(&mutex);
         exit(EXIT_SUCCESS);
     }
+
     for (int i = 0; i < number_of_processes; i++) {
         while (waitpid(pids[i], NULL, 0) > 0) {}
     }
@@ -297,6 +297,7 @@ TEST_F(TestSearchNumberOfRepeatingLengthParallel, null_arr_splitting) {
         pthread_mutex_destroy(&mutex);
         exit(EXIT_SUCCESS);
     }
+
     for (int i = 0; i < number_of_processes; i++) {
         while (waitpid(pids[i], NULL, 0) > 0) {}
     }
@@ -317,6 +318,7 @@ TEST_F(TestSearchNumberOfRepeatingLengthParallel, null_arr_counter) {
         pthread_mutex_destroy(&mutex);
         exit(EXIT_SUCCESS);
     }
+
     for (int i = 0; i < number_of_processes; i++) {
         while (waitpid(pids[i], NULL, 0) > 0) {}
     }
@@ -377,10 +379,11 @@ TEST_F(TestSearchMaxParallel, correct_searching) {
         free(pids);
         exit(EXIT_SUCCESS);
     }
+
     for (int i = 0; i < number_of_processes; i++) {
         while (waitpid(pids[i], NULL, 0) > 0) {}
     }
-    
+
     for (int i = 0; i < number_of_processes; i++) {
         ASSERT_EQ(correct_arr_max[i], arr_max[i]);
     }
@@ -394,6 +397,7 @@ TEST_F(TestSearchMaxParallel, null_arr_max) {
         free(pids);
         exit(EXIT_SUCCESS);
     }
+
     for (int i = 0; i < number_of_processes; i++) {
         while (waitpid(pids[i], NULL, 0) > 0) {}
     }
@@ -407,6 +411,7 @@ TEST_F(TestSearchMaxParallel, null_arr_splitting_for_max) {
         free(pids);
         exit(EXIT_SUCCESS);
     }
+
     for (int i = 0; i < number_of_processes; i++) {
         while (waitpid(pids[i], NULL, 0) > 0) {}
     }
@@ -420,6 +425,7 @@ TEST_F(TestSearchMaxParallel, null_arr_counter) {
         free(pids);
         exit(EXIT_SUCCESS);
     }
+
     for (int i = 0; i < number_of_processes; i++) {
         while (waitpid(pids[i], NULL, 0) > 0) {}
     }

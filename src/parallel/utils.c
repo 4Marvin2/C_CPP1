@@ -412,8 +412,6 @@ int search_arr_max_parallel(int fd,
                 return err;
             }
         }
-        close(fd);
-        free(pids);
         exit(CORRECT);
     }
 
@@ -594,6 +592,9 @@ int search_substring_of_the_most_common_length_parallel(const char *filename, ch
 
     int err = free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
     err += free_resources_for_max(arr_max, arr_splitting_for_max, number_of_processes);
+    if (err != CORRECT) {
+        return err;
+    }
 
     return CORRECT;
 }

@@ -25,7 +25,7 @@ TEST(multi_process, compare_algs_file_size_50) {
         free(result_parallel);
         exit(EXIT_FAILURE);
     }
-    
+
     char *result_serial = NULL;
 
     condition_of_function = search_substring_of_the_most_common_length_serial(filename, &result_serial);
@@ -43,7 +43,6 @@ TEST(multi_process, compare_algs_file_size_50) {
 }
 
 TEST(multi_process, compare_algs_file_size_150) {
-
     const char *filename = "size_150";
     char *result_parallel = NULL;
 
@@ -53,7 +52,7 @@ TEST(multi_process, compare_algs_file_size_150) {
         free(result_parallel);
         exit(EXIT_FAILURE);
     }
-    
+
     char *result_serial = NULL;
 
     condition_of_function = search_substring_of_the_most_common_length_serial(filename, &result_serial);
@@ -84,7 +83,7 @@ TEST(multi_process, compare_algs_file_size_2500) {
         free(result_parallel);
         EXIT_FAILURE;
     }
-    
+
     long time_parallel = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000;
 
     char *result_serial = NULL;
@@ -121,7 +120,7 @@ TEST(multi_process, compare_algs_file_size_7500) {
         free(result_parallel);
         EXIT_FAILURE;
     }
-    
+
     long time_parallel = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000;
 
     char *result_serial = NULL;
@@ -158,7 +157,7 @@ TEST(multi_process, compare_algs_file_size_15000) {
         free(result_parallel);
         EXIT_FAILURE;
     }
-    
+
     long time_parallel = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000;
 
     char *result_serial = NULL;
@@ -195,7 +194,7 @@ TEST(multi_process, compare_algs_file_size_50000) {
         free(result_parallel);
         EXIT_FAILURE;
     }
-    
+
     long time_parallel = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000;
 
     char *result_serial = NULL;
@@ -232,7 +231,7 @@ TEST(multi_process, compare_algs_file_size_150000) {
         free(result_parallel);
         EXIT_FAILURE;
     }
-    
+
     long time_parallel = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000;
 
     char *result_serial = NULL;
