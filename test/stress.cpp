@@ -87,7 +87,7 @@ TEST(multi_process, compare_algs_file_size_2500) {
         free(result_serial);
         EXIT_FAILURE;
     }
-    
+
     EXPECT_STREQ(result_serial, result_parallel);
 
     free(result_serial);
