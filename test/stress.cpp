@@ -3,8 +3,6 @@
 #include <cstdio>
 #include <fstream>
 #include <iostream>
-#include <time.h>
-#include <sys/time.h>
 
 #include "gtest/gtest.h"
 
@@ -72,35 +70,25 @@ TEST(multi_process, compare_algs_file_size_150) {
 TEST(multi_process, compare_algs_file_size_2500) {
     const char *filename = "size_2500";
     char *result_parallel = NULL;
-    struct timeval start;
-    struct timeval end;
 
-    gettimeofday(&start, NULL);
     int condition_of_function = search_substring_of_the_most_common_length_parallel(filename, &result_parallel);
-    gettimeofday(&end, NULL);
 
     if (condition_of_function != CORRECT) {
         free(result_parallel);
         EXIT_FAILURE;
     }
 
-    long time_parallel = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000;
-
     char *result_serial = NULL;
 
-    gettimeofday(&start, NULL);
     condition_of_function = search_substring_of_the_most_common_length_serial(filename, &result_serial);
-    gettimeofday(&end, NULL);
 
     if (condition_of_function != CORRECT) {
         free(result_parallel);
         free(result_serial);
         EXIT_FAILURE;
     }
-
-    long time_serial = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000;
-
-    EXPECT_EQ(TRUE, !!(time_serial < time_parallel));
+    
+    EXPECT_STREQ(result_serial, result_parallel);
 
     free(result_serial);
     free(result_parallel);
@@ -109,25 +97,17 @@ TEST(multi_process, compare_algs_file_size_2500) {
 TEST(multi_process, compare_algs_file_size_7500) {
     const char *filename = "size_7500";
     char *result_parallel = NULL;
-    struct timeval start;
-    struct timeval end;
 
-    gettimeofday(&start, NULL);
     int condition_of_function = search_substring_of_the_most_common_length_parallel(filename, &result_parallel);
-    gettimeofday(&end, NULL);
 
     if (condition_of_function != CORRECT) {
         free(result_parallel);
         EXIT_FAILURE;
     }
 
-    long time_parallel = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000;
-
     char *result_serial = NULL;
 
-    gettimeofday(&start, NULL);
     condition_of_function = search_substring_of_the_most_common_length_serial(filename, &result_serial);
-    gettimeofday(&end, NULL);
 
     if (condition_of_function != CORRECT) {
         free(result_parallel);
@@ -135,9 +115,7 @@ TEST(multi_process, compare_algs_file_size_7500) {
         EXIT_FAILURE;
     }
 
-    long time_serial = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000;
-
-    EXPECT_EQ(TRUE, !!(time_serial < time_parallel));
+    EXPECT_STREQ(result_serial, result_parallel);
 
     free(result_serial);
     free(result_parallel);
@@ -146,25 +124,17 @@ TEST(multi_process, compare_algs_file_size_7500) {
 TEST(multi_process, compare_algs_file_size_15000) {
     const char *filename = "size_15000";
     char *result_parallel = NULL;
-    struct timeval start;
-    struct timeval end;
 
-    gettimeofday(&start, NULL);
     int condition_of_function = search_substring_of_the_most_common_length_parallel(filename, &result_parallel);
-    gettimeofday(&end, NULL);
 
     if (condition_of_function != CORRECT) {
         free(result_parallel);
         EXIT_FAILURE;
     }
 
-    long time_parallel = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000;
-
     char *result_serial = NULL;
 
-    gettimeofday(&start, NULL);
     condition_of_function = search_substring_of_the_most_common_length_serial(filename, &result_serial);
-    gettimeofday(&end, NULL);
 
     if (condition_of_function != CORRECT) {
         free(result_parallel);
@@ -172,9 +142,7 @@ TEST(multi_process, compare_algs_file_size_15000) {
         EXIT_FAILURE;
     }
 
-    long time_serial = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000;
-
-    EXPECT_EQ(TRUE, !!(time_serial > time_parallel));
+    EXPECT_STREQ(result_serial, result_parallel);
 
     free(result_serial);
     free(result_parallel);
@@ -183,25 +151,17 @@ TEST(multi_process, compare_algs_file_size_15000) {
 TEST(multi_process, compare_algs_file_size_50000) {
     const char *filename = "size_50000";
     char *result_parallel = NULL;
-    struct timeval start;
-    struct timeval end;
 
-    gettimeofday(&start, NULL);
     int condition_of_function = search_substring_of_the_most_common_length_parallel(filename, &result_parallel);
-    gettimeofday(&end, NULL);
 
     if (condition_of_function != CORRECT) {
         free(result_parallel);
         EXIT_FAILURE;
     }
 
-    long time_parallel = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000;
-
     char *result_serial = NULL;
 
-    gettimeofday(&start, NULL);
     condition_of_function = search_substring_of_the_most_common_length_serial(filename, &result_serial);
-    gettimeofday(&end, NULL);
 
     if (condition_of_function != CORRECT) {
         free(result_parallel);
@@ -209,9 +169,7 @@ TEST(multi_process, compare_algs_file_size_50000) {
         EXIT_FAILURE;
     }
 
-    long time_serial = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000;
-
-    EXPECT_EQ(TRUE, !!(time_serial > time_parallel));
+    EXPECT_STREQ(result_serial, result_parallel);
 
     free(result_serial);
     free(result_parallel);
@@ -220,25 +178,17 @@ TEST(multi_process, compare_algs_file_size_50000) {
 TEST(multi_process, compare_algs_file_size_150000) {
     const char *filename = "size_150000";
     char *result_parallel = NULL;
-    struct timeval start;
-    struct timeval end;
 
-    gettimeofday(&start, NULL);
     int condition_of_function = search_substring_of_the_most_common_length_parallel(filename, &result_parallel);
-    gettimeofday(&end, NULL);
 
     if (condition_of_function != CORRECT) {
         free(result_parallel);
         EXIT_FAILURE;
     }
 
-    long time_parallel = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000;
-
     char *result_serial = NULL;
 
-    gettimeofday(&start, NULL);
     condition_of_function = search_substring_of_the_most_common_length_serial(filename, &result_serial);
-    gettimeofday(&end, NULL);
 
     if (condition_of_function != CORRECT) {
         free(result_parallel);
@@ -246,9 +196,7 @@ TEST(multi_process, compare_algs_file_size_150000) {
         EXIT_FAILURE;
     }
 
-    long time_serial = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000;
-
-    EXPECT_EQ(TRUE, !!(time_serial > time_parallel));
+    EXPECT_STREQ(result_serial, result_parallel);
 
     free(result_serial);
     free(result_parallel);
