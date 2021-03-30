@@ -1,2 +1,6 @@
 ignore:
   - "src/main.c"
+  - "test/main.cpp"
+  - "test/parallel_utils.cpp"
+  - "test/serial_utils.cpp"
+  - "test/stress.cpp"
