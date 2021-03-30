@@ -21,9 +21,9 @@ script:
     - cd ..
     - cd test/generator
     - bash file_generator.sh
-    - find . -name "size*" -exec cp {} ../../built/test/ \;
+    - find . -name "size*" -exec cp {} ../../build/test/ \;
     - rm size*
-    - cd ../../built/test
+    - cd ../../build/test
     - valgrind --track-origins=yes --child-silent-after-fork=yes --leak-check=full ./serial_utils_tests
     - valgrind --track-origins=yes --child-silent-after-fork=yes --leak-check=full ./parallel_utils_tests
     - valgrind --track-origins=yes --child-silent-after-fork=yes --leak-check=full ./stress_tests
