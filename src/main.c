@@ -8,7 +8,7 @@
 
 int main() {
     char *result_parallel = NULL;
-    const char *filename = "size_50";
+    const char *filename = "size_15000";
     struct timeval start;
     struct timeval end;
 

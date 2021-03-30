@@ -9,8 +9,8 @@ find_package(Threads REQUIRED)
 ##
 ### Coverage definitions ###
 ##
-set(CMAKE_C_FLAGS "-pedantic -fprofile-arcs -ftest-coverage")
-set(CMAKE_CXX_FLAGS "-pedantic -fprofile-arcs -ftest-coverage")
+set(CMAKE_C_FLAGS "-pedantic -fprofile-arcs -ftest-coverage -O0 -g -Wall -Werror -Wextra")
+set(CMAKE_CXX_FLAGS "-pedantic -fprofile-arcs -ftest-coverage -O0 -g")
 ##
 ### Coverage definitions ###
 ##

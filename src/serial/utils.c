@@ -52,7 +52,7 @@ int input(char **arr, FILE *stream) {
     return CORRECT;
 }
 
-int* create_arr_counter(size_t size) {
+int* create_arr_counter(int size) {
     int *number_of_repeating_length = (int *)malloc(sizeof(int) * size);
     if (number_of_repeating_length == NULL) {
         return NULL;
@@ -64,7 +64,7 @@ int* create_arr_counter(size_t size) {
     return number_of_repeating_length;
 }
 
-int search_number_of_repeating_length(char *arr, size_t size, int *arr_counter) {
+int search_number_of_repeating_length(char *arr, int size, int *arr_counter) {
     if ((arr == NULL) || (arr_counter == NULL)) {
         return NULL_PTR;
     }
@@ -83,7 +83,7 @@ int search_number_of_repeating_length(char *arr, size_t size, int *arr_counter) 
     return CORRECT;
 }
 
-int search_most_frequent_value(int *arr_counter, size_t size) {
+int search_most_frequent_value(int *arr_counter, int size) {
     if (arr_counter == NULL) {
         return NULL_PTR;
     }
@@ -99,7 +99,7 @@ int search_most_frequent_value(int *arr_counter, size_t size) {
     return most_frequent_length;
 }
 
-int search_first_occurrence_of_substring(char *arr, size_t size, int most_frequent_length) {
+int search_first_occurrence_of_substring(char *arr, int size, int most_frequent_length) {
     if (arr == NULL) {
         return NULL_PTR;
     }
