@@ -28,6 +28,8 @@ script:
     - valgrind --track-origins=yes --child-silent-after-fork=yes --leak-check=full ./parallel_utils_tests
     - valgrind --track-origins=yes --child-silent-after-fork=yes --leak-check=full ./general_utils_tests
     - valgrind --track-origins=yes --child-silent-after-fork=yes --leak-check=full ./stress_tests
+    - cd ..
+    - ./time_comparison
 
 after_success:
     - bash <(curl -s https://codecov.io/bash)

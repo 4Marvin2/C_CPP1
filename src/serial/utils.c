@@ -10,26 +10,32 @@
 #define MIN_ARR_SIZE 1
 #define BUFFERSIZE 10
 
-int input(char **arr, FILE *stream) {
-    if (arr == NULL) {
+int input(const char *filename, char **arr, int fd) {
+    if ((arr == NULL) || (filename == NULL)) {
         return NULL_PTR;
     }
-    if (stream == NULL) {
-        return NULL_STREAM;
+
+    fd = open(filename, O_RDONLY);
+    if (fd == -1) {
+        return OPEN_FILE_FAILED;
     }
-    char *buffer = (char *)malloc(sizeof(char) * BUFFERSIZE);
-    if (buffer == NULL) {
-        return NULL_PTR;
+
+    struct stat st;
+    stat(filename, &st);
+    size_t file_size = st.st_size;
+
+    size_t arr_size;
+    if (file_size % getpagesize() == 0) {
+        arr_size = file_size * sizeof(char);
+    } else {
+        arr_size = ((file_size * sizeof(char)) / getpagesize()) * getpagesize() + getpagesize();
     }
-    while (fgets(buffer, BUFFERSIZE, stream)) {
-        int size = realloc_array(arr, strlen(*arr) + 1 + strlen(buffer));
-        if ((size == NULL_PTR) || (size == NULL_PTR_REALLOC)) {
-            free(buffer);
-            return NULL_PTR;
-        }
-        strncat(*arr, buffer, BUFFERSIZE);
+    *arr = (char *)mmap(NULL, arr_size, PROT_READ, MAP_PRIVATE, fd, 0);
+
+    if ((*arr) == MAP_FAILED) {
+        close(fd);
+        return MMAP_FAILED;
     }
-    free(buffer);
 
     return CORRECT;
 }
@@ -81,27 +87,23 @@ int search_most_frequent_value(int *arr_counter, int size) {
     return most_frequent_length;
 }
 
-void free_resources(FILE *fp, char *first_arr, int *second_arr) {
-    fclose(fp);
-    free(first_arr);
+int free_resources(int fd, char *first_arr, int size, int *second_arr) {
+    close(fd);
+    int err = munmap(first_arr, size);
     free(second_arr);
+    if (err != CORRECT) {
+        return MUNMAP_FAILED;
+    }
+
+    return CORRECT;
 }
 
 int search_substring_of_the_most_common_length(const char *filename, char **result) {
-    char *my_arr = (char *)malloc(sizeof(char) * MIN_ARR_SIZE);
-    if (my_arr == NULL) {
-        return NULL_PTR;
-    }
-    my_arr[0] = '\0';
-    FILE *fp = fopen(filename, "r");
-    if (fp == NULL) {
-        free(my_arr);
-        return OPEN_FILE_FAILED;
-    }
-
-    int condition_of_function = input(&my_arr, fp);
+    char *my_arr = NULL;
+    int fd = 0;
+    int condition_of_function = input(filename, &my_arr, fd);
     if (condition_of_function != CORRECT) {
-        fclose(fp);
+        close(fd);
         free(my_arr);
         return condition_of_function;
     }
@@ -115,19 +117,28 @@ int search_substring_of_the_most_common_length(const char *filename, char **resu
 
     condition_of_function = search_number_of_repeating_length(my_arr, length, number_of_repeating_length);
     if (condition_of_function != CORRECT) {
-        free_resources(fp, my_arr, number_of_repeating_length);
+        int err = free_resources(fd, my_arr, length, number_of_repeating_length);
+        if (err != CORRECT) {
+            return err;
+        }
         return condition_of_function;
     }
 
     int most_frequent_length = search_most_frequent_value(number_of_repeating_length, length);
     if (most_frequent_length == NULL_PTR) {
-        free_resources(fp, my_arr, number_of_repeating_length);
+        int err = free_resources(fd, my_arr, length, number_of_repeating_length);
+        if (err != CORRECT) {
+            return err;
+        }
         return most_frequent_length;
     }
 
     int first_position_of_substring = search_first_occurrence_of_substring(my_arr, length, most_frequent_length);
     if (first_position_of_substring < 0) {
-        free_resources(fp, my_arr, number_of_repeating_length);
+        int err = free_resources(fd, my_arr, length, number_of_repeating_length);
+        if (err != CORRECT) {
+            return err;
+        }
         return first_position_of_substring;
     }
 
@@ -137,17 +148,26 @@ int search_substring_of_the_most_common_length(const char *filename, char **resu
 
     condition_of_function = search_substring(my_arr, first_position_of_substring, most_frequent_length, *result);
     if (condition_of_function != CORRECT) {
-        free_resources(fp, my_arr, number_of_repeating_length);
+        int err = free_resources(fd, my_arr, length, number_of_repeating_length);
+        if (err != CORRECT) {
+            return err;
+        }
         return condition_of_function;
     }
 
     condition_of_function = output(my_arr, first_position_of_substring, most_frequent_length, stdout);
     if (condition_of_function != CORRECT) {
-        free_resources(fp, my_arr, number_of_repeating_length);
+        int err = free_resources(fd, my_arr, length, number_of_repeating_length);
+        if (err != CORRECT) {
+            return err;
+        }
         return condition_of_function;
     }
 
-    free_resources(fp, my_arr, number_of_repeating_length);
+    int err = free_resources(fd, my_arr, length, number_of_repeating_length);
+    if (err != CORRECT) {
+        return err;
+    }
 
     return CORRECT;
 }

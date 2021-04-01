@@ -156,8 +156,7 @@ int create_forks(int number_of_processes, int *pids) {
 int search_number_of_repeating_length_parallel(char *my_arr,
                                                int *arr_splitting,
                                                int *arr_counter,
-                                               int processes_number,
-                                               pthread_mutex_t mutex) {
+                                               int processes_number) {
     if ((my_arr == NULL) || (arr_splitting == NULL) || (arr_counter == NULL)) {
         return NULL_PTR;
     }
@@ -177,9 +176,9 @@ int search_number_of_repeating_length_parallel(char *my_arr,
         if (current == previous) {
             temp_count++;
         } else {
-            pthread_mutex_lock(&mutex);
+            // pthread_mutex_lock(&mutex);
             arr_counter[temp_count]++;
-            pthread_mutex_unlock(&mutex);
+            // pthread_mutex_unlock(&mutex);
             temp_count = 1;
         }
     }
@@ -256,26 +255,25 @@ __attribute__((__always_inline__)) inline int search_arr_of_repeating_length_par
         return processes_number;
     }
 
-    pthread_mutexattr_t attr;
-    pthread_mutex_t mutex;
-    pthread_mutexattr_init(&attr);
-    pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
-    pthread_mutex_init(&mutex, &attr);
+    // pthread_mutexattr_t attr;
+    // pthread_mutex_t mutex;
+    // pthread_mutexattr_init(&attr);
+    // pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
+    // pthread_mutex_init(&mutex, &attr);
 
     if (processes_number != PARENT_PID) {
         int condition_of_function = search_number_of_repeating_length_parallel(my_arr,
                                                                                arr_splitting,
                                                                                arr_counter,
-                                                                               processes_number,
-                                                                               mutex);
+                                                                               processes_number);
         if (condition_of_function != CORRECT) {
             free(pids);
             int err = free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
             exit(err);
         }
         free(pids);
-        pthread_mutexattr_destroy(&attr);
-        pthread_mutex_destroy(&mutex);
+        // pthread_mutexattr_destroy(&attr);
+        // pthread_mutex_destroy(&mutex);
         exit(CORRECT);
     }
 
@@ -283,8 +281,8 @@ __attribute__((__always_inline__)) inline int search_arr_of_repeating_length_par
         while (waitpid(pids[i], NULL, 0) > 0) {}
     }
 
-    pthread_mutexattr_destroy(&attr);
-    pthread_mutex_destroy(&mutex);
+    // pthread_mutexattr_destroy(&attr);
+    // pthread_mutex_destroy(&mutex);
 
     free(pids);
 

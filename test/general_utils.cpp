@@ -11,36 +11,6 @@ extern "C" {
 #include "general/utils.h"
 }
 
-// тесты realloc_array
-class TestReallocArr : public ::testing::Test {
- protected:
-    void SetUp() {
-        arr = reinterpret_cast<char *>(malloc(sizeof(char) * MIN_ARR_SIZE));
-        correct_arr = reinterpret_cast<char *>(malloc(sizeof(char) * MIN_ARR_SIZE));
-
-        arr[0] = '\0';
-        correct_arr[0] = '\0';
-    }
-    void TearDown() {
-        free(arr);
-        free(correct_arr);
-    }
-    char *arr, *correct_arr;
-};
-
-TEST_F(TestReallocArr, correct_realloc) {
-    ASSERT_EQ(2, realloc_array(&arr, MIN_ARR_SIZE * 2));
-    ASSERT_EQ(correct_arr[0], arr[0]);
-}
-
-TEST_F(TestReallocArr, invalid_size) {
-    ASSERT_EQ(NULL_SIZE_REALLOC, realloc_array(&arr, 0));
-}
-
-TEST_F(TestReallocArr, null_ptr) {
-    ASSERT_EQ(NULL_PTR, realloc_array(NULL, MIN_ARR_SIZE));
-}
-
 // тесты search_max
 class TestSearchMax: public ::testing::Test {
  protected:

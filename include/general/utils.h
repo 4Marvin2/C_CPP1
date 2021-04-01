@@ -13,8 +13,6 @@
 #define NULL_STREAM -6
 #define NO_SUBSTRING -7
 
-int realloc_array(char **arr, size_t size);
-
 int search_max(int *arr, int size);
 
 int search_substring(char *arr, int first_position_of_substring, int most_frequent_length, char *result);

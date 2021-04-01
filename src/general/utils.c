@@ -6,26 +6,6 @@
 
 #include "general/utils.h"
 
-int realloc_array(char **arr, size_t size) {
-    if (arr == NULL) {
-        return NULL_PTR;
-    }
-    if (size == 0) {
-        return NULL_SIZE_REALLOC;
-    }
-    char *temp_arr = (char *)malloc(sizeof(char) * size);
-    if (temp_arr ==  NULL) {
-        return NULL_PTR_REALLOC;
-    }
-    // перекопируем
-    memcpy(temp_arr, (*arr), strlen(*arr) + 1);
-    free(*arr);
-    // переназначаем изначальный массив
-    (*arr) = temp_arr;
-
-    return size;
-}
-
 int search_max(int *arr, int size) {
     if (arr == NULL) {
         return NULL_PTR;

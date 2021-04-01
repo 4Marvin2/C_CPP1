@@ -55,10 +55,13 @@ add_library(most_frequent_seqence_parallel MODULE
         ${SRC_DIR}/parallel/utils.c)
 
 add_executable(HW2 ${SRC_DIR}/main.c)
+add_executable(time_comparison ${SRC_DIR}/time_comparison.c)
 
 target_link_libraries(HW2 Threads::Threads pthread -ldl most_frequent_seqence_serial)
+target_link_libraries(time_comparison Threads::Threads pthread -ldl most_frequent_seqence_serial)
 
 target_include_directories(HW2 PUBLIC ${INC_DIR})
+target_include_directories(time_comparison PUBLIC ${INC_DIR})
 ##
 ### Source definitions ###
 ##

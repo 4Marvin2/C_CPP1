@@ -15,54 +15,45 @@ extern "C" {
 // тесты input
 class TestInput : public ::testing::Test {
  protected:
-    void SetUp() {
-        arr = reinterpret_cast<char *>(malloc(sizeof(char) * MIN_ARR_SIZE));
-        correct_arr = reinterpret_cast<char *>(malloc(sizeof(char) * MIN_ARR_SIZE));
-
-        arr[0] = '\0';
-        correct_arr[0] = '\0';
-    }
     void TearDown() {
-        free(arr);
-        free(correct_arr);
-        remove(file_name);
-        if (fp != NULL) {
-            fclose(fp);
+        if (arr != nullptr) {
+            munmap(arr, 9);
         }
+        remove(file_name);
+        close(fd);
     }
-    char *arr, *correct_arr;
-    FILE *fp = nullptr;
-    char file_name[11] = "./test.txt";
+    char *arr = nullptr;
+    const char *file_name = "./test.txt";
+    int fd = 0;
 };
 
-TEST_F(TestInput, correct_reading) {
+TEST_F(TestInput, correct_createing_shared_file) {
     std::ofstream out(file_name);
-    out << "qwert";
+    out << "qwerthhh";
     out.close();
-    fp = fopen(file_name, "r");
 
-    ASSERT_EQ(CORRECT, input(&arr, fp));
-    ASSERT_STREQ("qwert", arr);
+    ASSERT_EQ(CORRECT, input(file_name, &arr, fd));
 }
 
 TEST_F(TestInput, null_arr) {
-    fp = fopen(file_name, "r");
-
-    ASSERT_EQ(NULL_PTR, input(NULL, fp));
+    ASSERT_EQ(NULL_PTR, input(file_name, NULL, fd));
 }
 
-TEST_F(TestInput, null_file_pointer) {
-    ASSERT_EQ(NULL_STREAM, input(&arr, NULL));
+TEST_F(TestInput, null_file_name) {
+    ASSERT_EQ(NULL_PTR, input(NULL, &arr, fd));
+}
+
+TEST_F(TestInput, no_valid_file_name) {
+    const char *no_valid_file_name = "./aaaa.txt";
+    ASSERT_EQ(OPEN_FILE_FAILED, input(no_valid_file_name, &arr, fd));
 }
 
 // тесты search_number_of_repeating_length
 class TestSearchNumberOfRepeatingLength : public ::testing::Test {
  protected:
     void SetUp() {
-        arr = reinterpret_cast<char *>(malloc(sizeof(char) * MIN_ARR_SIZE));
         correct_arr = reinterpret_cast<int *>(malloc(sizeof(int) * 13));
 
-        arr[0] = '\0';
         correct_arr[0] = 0;
         correct_arr[1] = 1;
         correct_arr[2] = 2;
@@ -78,17 +69,15 @@ class TestSearchNumberOfRepeatingLength : public ::testing::Test {
         correct_arr[12] = 0;
     }
     void TearDown() {
-        free(arr);
+        // free(arr);
         free(correct_arr);
         free(number_of_repeating_length);
         remove(file_name);
-        if (fp != NULL) {
-            fclose(fp);
-        }
+        close(fd);
     }
-    char *arr;
+    char *arr = nullptr;
     int *correct_arr, *number_of_repeating_length = nullptr;
-    FILE *fp = NULL;
+    int fd = 0;
     char file_name[11] = "./test.txt";
 };
 
@@ -96,8 +85,7 @@ TEST_F(TestSearchNumberOfRepeatingLength, correct_searching) {
     std::ofstream out(file_name);
     out << "qwwhhhggkkkk";
     out.close();
-    fp = fopen(file_name, "r");
-    input(&arr, fp);
+    input(file_name, &arr, fd);
     size_t size = strlen(arr) + 1;
     number_of_repeating_length = create_arr_counter(size);
 

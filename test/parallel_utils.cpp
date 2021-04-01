@@ -44,7 +44,6 @@ TEST_F(TestCreateSharedFile, null_file_name) {
 }
 
 TEST_F(TestCreateSharedFile, no_valid_file_name) {
-    // fp = fopen(file_name, "r");
     char no_valid_file_name[11] = "./aaaa.txt";
     ASSERT_EQ(OPEN_FILE_FAILED, create_shared_file(no_valid_file_name, &arr, fd));
 }
@@ -156,10 +155,6 @@ class TestSearchNumberOfRepeatingLengthParallel: public ::testing::Test {
         finding_partition_of_arr_char(arr_splitting, number_of_processes, arr, size);
         create_shared_memory(&arr_counter, size);
 
-        pthread_mutexattr_init(&attr);
-        pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
-        pthread_mutex_init(&mutex, &attr);
-
         correct_arr_counter = reinterpret_cast<int *>(malloc(sizeof(int) * size));
         correct_arr_counter[0] = 0;
         correct_arr_counter[1] = 5;
@@ -179,8 +174,6 @@ class TestSearchNumberOfRepeatingLengthParallel: public ::testing::Test {
     void TearDown() {
         free(pids);
         free(correct_arr_counter);
-        pthread_mutexattr_destroy(&attr);
-        pthread_mutex_destroy(&mutex);
         if (pid == PARENT_PID) {
             free_main_resources(fd, arr, size, arr_counter, arr_splitting, number_of_processes);
             remove(file_name);
@@ -193,8 +186,6 @@ class TestSearchNumberOfRepeatingLengthParallel: public ::testing::Test {
     int size;
     int pid;
     char file_name[11] = "./test.txt";
-    pthread_mutexattr_t attr;
-    pthread_mutex_t mutex;
 };
 
 TEST_F(TestSearchNumberOfRepeatingLengthParallel, correct_searching) {
@@ -203,13 +194,10 @@ TEST_F(TestSearchNumberOfRepeatingLengthParallel, correct_searching) {
         ASSERT_EQ(CORRECT, search_number_of_repeating_length_parallel(arr,
                                                                       arr_splitting,
                                                                       arr_counter,
-                                                                      pid,
-                                                                      mutex));
+                                                                      pid));
         close(fd);
         free(correct_arr_counter);
         free(pids);
-        pthread_mutexattr_destroy(&attr);
-        pthread_mutex_destroy(&mutex);
         exit(EXIT_SUCCESS);
     }
 
@@ -228,13 +216,10 @@ TEST_F(TestSearchNumberOfRepeatingLengthParallel, null_char_arr) {
         ASSERT_EQ(NULL_PTR, search_number_of_repeating_length_parallel(NULL,
                                                                        arr_splitting,
                                                                        arr_counter,
-                                                                       pid,
-                                                                       mutex));
+                                                                       pid));
         close(fd);
         free(correct_arr_counter);
         free(pids);
-        pthread_mutexattr_destroy(&attr);
-        pthread_mutex_destroy(&mutex);
         exit(EXIT_SUCCESS);
     }
 
@@ -249,13 +234,10 @@ TEST_F(TestSearchNumberOfRepeatingLengthParallel, null_arr_splitting) {
         ASSERT_EQ(NULL_PTR, search_number_of_repeating_length_parallel(arr,
                                                                        NULL,
                                                                        arr_counter,
-                                                                       pid,
-                                                                       mutex));
+                                                                       pid));
         close(fd);
         free(correct_arr_counter);
         free(pids);
-        pthread_mutexattr_destroy(&attr);
-        pthread_mutex_destroy(&mutex);
         exit(EXIT_SUCCESS);
     }
 
@@ -270,13 +252,10 @@ TEST_F(TestSearchNumberOfRepeatingLengthParallel, null_arr_counter) {
         ASSERT_EQ(NULL_PTR, search_number_of_repeating_length_parallel(arr,
                                                                        arr_splitting,
                                                                        NULL,
-                                                                       pid,
-                                                                       mutex));
+                                                                       pid));
         close(fd);
         free(correct_arr_counter);
         free(pids);
-        pthread_mutexattr_destroy(&attr);
-        pthread_mutex_destroy(&mutex);
         exit(EXIT_SUCCESS);
     }
 
