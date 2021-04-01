@@ -26,6 +26,7 @@ script:
     - cd ../../build/test
     - valgrind --track-origins=yes --child-silent-after-fork=yes --leak-check=full ./serial_utils_tests
     - valgrind --track-origins=yes --child-silent-after-fork=yes --leak-check=full ./parallel_utils_tests
+    - valgrind --track-origins=yes --child-silent-after-fork=yes --leak-check=full ./general_utils_tests
     - valgrind --track-origins=yes --child-silent-after-fork=yes --leak-check=full ./stress_tests
 
 after_success:

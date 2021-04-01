@@ -8,8 +8,9 @@
 #include "gtest/gtest.h"
 
 extern "C" {
-#include "parallel/utils.h"
+#include "utils.h"
 #include "../src/parallel/utils.c"
+#include "general/utils.h"
 }
 
 // тесты create_shared_file
@@ -65,46 +66,6 @@ TEST_F(TestCreateSharedMemory, correct_creating_shared_memory) {
 
 TEST_F(TestCreateSharedMemory, null_arr) {
     ASSERT_EQ(NULL_PTR, create_shared_memory(NULL, 1));
-}
-
-// тесты finding_number_of_processes
-class TestFindingNumberOfProcesses : public ::testing::Test {
- protected:
-    size_t size_xxs = 50;       // самый маленький размер - 1 процесс
-    size_t size_xs = 500;       // размер чуть больше - 2 процесса
-    size_t size_s = 2500;       // маленький размер - 3 процесса
-    size_t size_m = 7500;       // средний размер - 4 процесса
-    size_t size_l = 15000;      // большой размер - 6 процессов
-    size_t size_xl = 50000;     // размер больше - 7 процессов
-    size_t size_xxl = 200000;   // огромный размер - 10 процессов
-};
-
-TEST_F(TestFindingNumberOfProcesses, correct_finding_xxs) {
-    ASSERT_EQ(1, finding_number_of_processes(size_xxs));
-}
-
-TEST_F(TestFindingNumberOfProcesses, correct_finding_xs) {
-    ASSERT_EQ(2, finding_number_of_processes(size_xs));
-}
-
-TEST_F(TestFindingNumberOfProcesses, correct_finding_s) {
-    ASSERT_EQ(3, finding_number_of_processes(size_s));
-}
-
-TEST_F(TestFindingNumberOfProcesses, correct_finding_m) {
-    ASSERT_EQ(4, finding_number_of_processes(size_m));
-}
-
-TEST_F(TestFindingNumberOfProcesses, correct_finding_l) {
-    ASSERT_EQ(6, finding_number_of_processes(size_l));
-}
-
-TEST_F(TestFindingNumberOfProcesses, correct_finding_xl) {
-    ASSERT_EQ(7, finding_number_of_processes(size_xl));
-}
-
-TEST_F(TestFindingNumberOfProcesses, correct_finding_xxl) {
-    ASSERT_EQ(10, finding_number_of_processes(size_xxl));
 }
 
 // тесты finding_partition_of_arr_char
@@ -330,7 +291,8 @@ class TestSearchMaxParallel: public ::testing::Test {
     void SetUp() {
         pids = reinterpret_cast<int *>(malloc(sizeof(int) * number_of_processes));
         create_shared_memory(&arr_splitting_for_max, number_of_processes);
-        create_shared_memory(&arr_max, number_of_processes);
+        create_shared_memory(&arr_max.arr, number_of_processes);
+        create_shared_memory(&arr_max.max_length, number_of_processes);
         create_shared_memory(&arr_counter, size);
         arr_counter[0] = 0;
         arr_counter[1] = 5;
@@ -348,21 +310,22 @@ class TestSearchMaxParallel: public ::testing::Test {
         arr_counter[13] = 0;
         finding_partition_of_arr_int(arr_splitting_for_max, number_of_processes, arr_counter, size);
         correct_arr_max = reinterpret_cast<int *>(malloc(sizeof(int) * number_of_processes));
-        correct_arr_max[0] = 3;
-        correct_arr_max[1] = 6;
-        correct_arr_max[2] = 12;
+        correct_arr_max[0] = 2;
+        correct_arr_max[1] = 7;
+        correct_arr_max[2] = 8;
     }
     void TearDown() {
         free(pids);
         free(correct_arr_max);
         if (pid == PARENT_PID) {
-            munmap(arr_max, number_of_processes);
+            munmap(arr_max.arr, number_of_processes);
+            munmap(arr_max.max_length, number_of_processes);
             munmap(arr_splitting_for_max, number_of_processes);
             munmap(arr_counter, size);
         }
     }
     int *pids = nullptr;
-    int *arr_max = nullptr;
+    ArrMax arr_max;
     int *arr_splitting_for_max = nullptr;
     int *arr_counter = nullptr;
     int *correct_arr_max = nullptr;
@@ -374,7 +337,7 @@ class TestSearchMaxParallel: public ::testing::Test {
 TEST_F(TestSearchMaxParallel, correct_searching) {
     pid = create_forks(number_of_processes, pids);
     if (pid != PARENT_PID) {
-        ASSERT_EQ(CORRECT, search_max_parallel(arr_max, arr_splitting_for_max, arr_counter, pid));
+        ASSERT_EQ(CORRECT, search_max_parallel(&arr_max, arr_splitting_for_max, arr_counter, pid));
         free(correct_arr_max);
         free(pids);
         exit(EXIT_SUCCESS);
@@ -385,7 +348,7 @@ TEST_F(TestSearchMaxParallel, correct_searching) {
     }
 
     for (int i = 0; i < number_of_processes; i++) {
-        ASSERT_EQ(correct_arr_max[i], arr_max[i]);
+        ASSERT_EQ(correct_arr_max[i], arr_max.arr[i]);
     }
 }
 
@@ -406,7 +369,7 @@ TEST_F(TestSearchMaxParallel, null_arr_max) {
 TEST_F(TestSearchMaxParallel, null_arr_splitting_for_max) {
     pid = create_forks(number_of_processes, pids);
     if (pid != PARENT_PID) {
-        ASSERT_EQ(NULL_PTR, search_max_parallel(arr_max, NULL, arr_counter, pid));
+        ASSERT_EQ(NULL_PTR, search_max_parallel(&arr_max, NULL, arr_counter, pid));
         free(correct_arr_max);
         free(pids);
         exit(EXIT_SUCCESS);
@@ -420,7 +383,7 @@ TEST_F(TestSearchMaxParallel, null_arr_splitting_for_max) {
 TEST_F(TestSearchMaxParallel, null_arr_counter) {
     pid = create_forks(number_of_processes, pids);
     if (pid != PARENT_PID) {
-        ASSERT_EQ(NULL_PTR, search_max_parallel(arr_max, arr_splitting_for_max, NULL, pid));
+        ASSERT_EQ(NULL_PTR, search_max_parallel(&arr_max, arr_splitting_for_max, NULL, pid));
         free(correct_arr_max);
         free(pids);
         exit(EXIT_SUCCESS);
@@ -431,136 +394,7 @@ TEST_F(TestSearchMaxParallel, null_arr_counter) {
     }
 }
 
-// тесты search_max
-class TestSearchMax: public ::testing::Test {
- protected:
-    void SetUp() {
-        arr = reinterpret_cast<int *>(malloc(sizeof(int) * size));
-        arr[0] = 10;
-        arr[1] = 5;
-        arr[2] = 1;
-        arr[3] = 2;
-        arr[4] = 42;
-        arr[5] = 6;
-    }
-    void TearDown() {
-        free(arr);
-    }
-    int *arr = nullptr;
-    int max;
-    const int size = 6;
-    const int correct_max = 42;
-};
-
-TEST_F(TestSearchMax, correct_searching) {
-    ASSERT_EQ(correct_max, search_max(arr, size));
-}
-
-TEST_F(TestSearchMax, null_arr) {
-    ASSERT_EQ(NULL_PTR, search_max(NULL, size));
-}
-
-// тесты search_first_occurrence_of_substring
-class TestSearchFirstOccurenceOfSubstring : public ::testing::Test {
- protected:
-    void SetUp() {
-        arr = reinterpret_cast<char *>(malloc(sizeof(char) * 7));
-        strncpy(arr, "qwhhhu", 7);
-    }
-    void TearDown() {
-        free(arr);
-    }
-    char *arr = nullptr;
-};
-
-TEST_F(TestSearchFirstOccurenceOfSubstring, correct_searching) {
-    ASSERT_EQ(2, search_first_occurrence_of_substring(arr, 7, 3));
-}
-
-TEST_F(TestSearchFirstOccurenceOfSubstring, null_arr) {
-    ASSERT_EQ(NULL_PTR, search_first_occurrence_of_substring(NULL, 7, 3));
-}
-
-TEST_F(TestSearchFirstOccurenceOfSubstring, no_substring_this_length) {
-    ASSERT_EQ(NO_SUBSTRING, search_first_occurrence_of_substring(arr, 7, 4));
-}
-
-// тесты search_substring
-class TestSearchSubstring : public ::testing::Test {
- protected:
-    void SetUp() {
-        arr = reinterpret_cast<char *>(malloc(sizeof(char) * 7));
-        strncpy(arr, "qwhhhu", 7);
-        correct_arr = reinterpret_cast<char *>(malloc(sizeof(char) * 4));
-        strncpy(correct_arr, "hhh", 4);
-        result = reinterpret_cast<char *>(malloc(sizeof(char) * 4));
-    }
-    void TearDown() {
-        free(arr);
-        free(correct_arr);
-        free(result);
-    }
-    char *arr, *correct_arr, *result = nullptr;
-};
-
-TEST_F(TestSearchSubstring , correct_searching) {
-    ASSERT_EQ(CORRECT, search_substring(arr, 2, 3, result));
-    ASSERT_STREQ(correct_arr, result);
-}
-
-TEST_F(TestSearchSubstring , null_arr) {
-    ASSERT_EQ(NULL_PTR, search_substring(NULL, 2, 3, result));
-}
-
-TEST_F(TestSearchSubstring , null_result_arr) {
-    ASSERT_EQ(NULL_PTR, search_substring(arr, 2, 3, NULL));
-}
-
-// тесты output
-class TestOutput : public ::testing::Test {
- protected:
-    void SetUp() {
-        arr = reinterpret_cast<char *>(malloc(sizeof(char) * 7));
-        strncpy(arr, "qwhhhu", 7);
-        correct_arr = reinterpret_cast<char *>(malloc(sizeof(char) * 13));
-        strncpy(correct_arr, "Result: hhh\n", 13);
-        result = reinterpret_cast<char *>(malloc(sizeof(char) * 13));
-    }
-    void TearDown() {
-        free(arr);
-        free(correct_arr);
-        free(result);
-        fclose(fp);
-        remove(file_name);
-    }
-    FILE *fp;
-    char *arr, *correct_arr, *result = nullptr;
-    char file_name[11] = "./test.txt";
-};
-
-TEST_F(TestOutput , correct_output) {
-    fp = fopen(file_name, "w+");
-
-    ASSERT_EQ(CORRECT, output(arr, 2, 3, fp));
-
-    fseek(fp, 0, SEEK_SET);
-    fgets(result, 13, fp);
-    ASSERT_STREQ(correct_arr, result);
-}
-
-TEST_F(TestOutput , null_arr) {
-    fp = fopen(file_name, "w+");
-
-    ASSERT_EQ(NULL_PTR, output(NULL, 2, 3, fp));
-}
-
-TEST_F(TestOutput , null_stream) {
-    fp = fopen(file_name, "w+");
-
-    ASSERT_EQ(NULL_STREAM, output(arr, 2, 3, NULL));
-}
-
-// тесты search_arr_of_repeating_length_parallel
+// тесты search_arr_of_repeating_length
 class TestSearchSubstringOfTheMostCommonLengthParallel : public ::testing::Test {
  protected:
     void TearDown() {
@@ -579,7 +413,7 @@ TEST_F(TestSearchSubstringOfTheMostCommonLengthParallel, correct_searching_with_
     out << "qwwhhhggkkkkllll";
     out.close();
 
-    ASSERT_EQ(CORRECT, search_substring_of_the_most_common_length_parallel(file_name, &result));
+    ASSERT_EQ(CORRECT, search_substring_of_the_most_common_length(file_name, &result));
     ASSERT_STREQ(correct_arr, result);
 }
 
@@ -591,7 +425,7 @@ TEST_F(TestSearchSubstringOfTheMostCommonLengthParallel, correct_searching_with_
     out << "jjjjj";
     out.close();
 
-    ASSERT_EQ(CORRECT, search_substring_of_the_most_common_length_parallel(file_name, &result));
+    ASSERT_EQ(CORRECT, search_substring_of_the_most_common_length(file_name, &result));
     ASSERT_STREQ(correct_arr, result);
 }
 
@@ -603,12 +437,12 @@ TEST_F(TestSearchSubstringOfTheMostCommonLengthParallel, correct_searching_with_
     out << "qwertjjkkkllllttooooqwertvvvv";
     out.close();
 
-    ASSERT_EQ(CORRECT, search_substring_of_the_most_common_length_parallel(file_name, &result));
+    ASSERT_EQ(CORRECT, search_substring_of_the_most_common_length(file_name, &result));
     ASSERT_STREQ(correct_arr, result);
 }
 
 TEST_F(TestSearchSubstringOfTheMostCommonLengthParallel, open_file_failed) {
     char no_valid_file_name[11] = "./aaaa.txt";
 
-    ASSERT_EQ(OPEN_FILE_FAILED, search_substring_of_the_most_common_length_parallel(no_valid_file_name, &result));
+    ASSERT_EQ(OPEN_FILE_FAILED, search_substring_of_the_most_common_length(no_valid_file_name, &result));
 }

@@ -10,6 +10,6 @@ foreach(file ${tests})
         ${sources}
         ${file}
         "${PROJECT_SOURCE_DIR}/test/main.cpp")
-    target_link_libraries("${name}_tests" gtest_main Threads::Threads pthread most_frequent_seqence_serial most_frequent_seqence_parallel)
+    target_link_libraries("${name}_tests" gtest_main Threads::Threads pthread -ldl most_frequent_seqence_serial)
     add_test(NAME ${name} COMMAND "${name}_tests")
 endforeach()

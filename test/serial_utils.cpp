@@ -7,38 +7,9 @@
 #include "gtest/gtest.h"
 
 extern "C" {
-#include "serial/utils.h"
+#include "utils.h"
 #include "../src/serial/utils.c"
-}
-
-// тесты realloc_array
-class TestReallocArr : public ::testing::Test {
- protected:
-    void SetUp() {
-        arr = reinterpret_cast<char *>(malloc(sizeof(char) * MIN_ARR_SIZE));
-        correct_arr = reinterpret_cast<char *>(malloc(sizeof(char) * MIN_ARR_SIZE));
-
-        arr[0] = '\0';
-        correct_arr[0] = '\0';
-    }
-    void TearDown() {
-        free(arr);
-        free(correct_arr);
-    }
-    char *arr, *correct_arr;
-};
-
-TEST_F(TestReallocArr, correct_realloc) {
-    ASSERT_EQ(2, realloc_array(&arr, MIN_ARR_SIZE * 2));
-    ASSERT_EQ(correct_arr[0], arr[0]);
-}
-
-TEST_F(TestReallocArr, invalid_size) {
-    ASSERT_EQ(NULL_SIZE_REALLOC, realloc_array(&arr, 0));
-}
-
-TEST_F(TestReallocArr, null_ptr) {
-    ASSERT_EQ(NULL_PTR, realloc_array(NULL, MIN_ARR_SIZE));
+#include "general/utils.h"
 }
 
 // тесты input
@@ -172,107 +143,7 @@ TEST_F(TestSearchMostFrequentValue, null_arr) {
     ASSERT_EQ(NULL_PTR, search_most_frequent_value(NULL, 6));
 }
 
-// тесты search_first_occurrence_of_substring
-class TestSearchFirstOccurenceOfSubstring : public ::testing::Test {
- protected:
-    void SetUp() {
-        arr = reinterpret_cast<char *>(malloc(sizeof(char) * 7));
-        strncpy(arr, "qwhhhu", 7);
-    }
-    void TearDown() {
-        free(arr);
-    }
-    char *arr = nullptr;
-};
-
-TEST_F(TestSearchFirstOccurenceOfSubstring, correct_searching) {
-    ASSERT_EQ(2, search_first_occurrence_of_substring(arr, 7, 3));
-}
-
-TEST_F(TestSearchFirstOccurenceOfSubstring, null_arr) {
-    ASSERT_EQ(NULL_PTR, search_first_occurrence_of_substring(NULL, 7, 3));
-}
-
-TEST_F(TestSearchFirstOccurenceOfSubstring, no_substring_this_length) {
-    ASSERT_EQ(NO_SUBSTRING, search_first_occurrence_of_substring(arr, 7, 4));
-}
-
-// тесты search_substring
-class TestSearchSubstring : public ::testing::Test {
- protected:
-    void SetUp() {
-        arr = reinterpret_cast<char *>(malloc(sizeof(char) * 7));
-        strncpy(arr, "qwhhhu", 7);
-        correct_arr = reinterpret_cast<char *>(malloc(sizeof(char) * 4));
-        strncpy(correct_arr, "hhh", 4);
-        result = reinterpret_cast<char *>(malloc(sizeof(char) * 4));
-    }
-    void TearDown() {
-        free(arr);
-        free(correct_arr);
-        free(result);
-    }
-    char *arr, *correct_arr, *result = nullptr;
-};
-
-TEST_F(TestSearchSubstring , correct_searching) {
-    ASSERT_EQ(CORRECT, search_substring(arr, 2, 3, result));
-    ASSERT_STREQ(correct_arr, result);
-}
-
-TEST_F(TestSearchSubstring , null_arr) {
-    ASSERT_EQ(NULL_PTR, search_substring(NULL, 2, 3, result));
-}
-
-TEST_F(TestSearchSubstring , null_result_arr) {
-    ASSERT_EQ(NULL_PTR, search_substring(arr, 2, 3, NULL));
-}
-
-// тесты output
-class TestOutput : public ::testing::Test {
- protected:
-    void SetUp() {
-        arr = reinterpret_cast<char *>(malloc(sizeof(char) * 7));
-        strncpy(arr, "qwhhhu", 7);
-        correct_arr = reinterpret_cast<char *>(malloc(sizeof(char) * 13));
-        strncpy(correct_arr, "Result: hhh\n", 13);
-        result = reinterpret_cast<char *>(malloc(sizeof(char) * 13));
-    }
-    void TearDown() {
-        free(arr);
-        free(correct_arr);
-        free(result);
-        fclose(fp);
-        remove(file_name);
-    }
-    FILE *fp;
-    char *arr, *correct_arr, *result = nullptr;
-    char file_name[11] = "./test.txt";
-};
-
-TEST_F(TestOutput , correct_output) {
-    fp = fopen(file_name, "w+");
-
-    ASSERT_EQ(CORRECT, output(arr, 2, 3, fp));
-
-    fseek(fp, 0, SEEK_SET);
-    fgets(result, 13, fp);
-    ASSERT_STREQ(correct_arr, result);
-}
-
-TEST_F(TestOutput , null_arr) {
-    fp = fopen(file_name, "w+");
-
-    ASSERT_EQ(NULL_PTR, output(NULL, 2, 3, fp));
-}
-
-TEST_F(TestOutput , null_stream) {
-    fp = fopen(file_name, "w+");
-
-    ASSERT_EQ(NULL_STREAM, output(arr, 2, 3, NULL));
-}
-
-// тесты search_substring_of_the_most_common_length_serial
+// тесты search_substring_of_the_most_common_length
 class TestSearchSubstringOfTheMostCommonLengthSerial : public ::testing::Test {
  protected:
     void TearDown() {
@@ -292,7 +163,7 @@ TEST_F(TestSearchSubstringOfTheMostCommonLengthSerial, correct_searching_with_tw
     out << "qwwhhhggkkkkllll";
     out.close();
 
-    ASSERT_EQ(CORRECT, search_substring_of_the_most_common_length_serial(file_name, &result));
+    ASSERT_EQ(CORRECT, search_substring_of_the_most_common_length(file_name, &result));
     ASSERT_STREQ(correct_arr, result);
 }
 
@@ -304,7 +175,7 @@ TEST_F(TestSearchSubstringOfTheMostCommonLengthSerial, correct_searching_with_eq
     out << "jjjjj";
     out.close();
 
-    ASSERT_EQ(CORRECT, search_substring_of_the_most_common_length_serial(file_name, &result));
+    ASSERT_EQ(CORRECT, search_substring_of_the_most_common_length(file_name, &result));
     ASSERT_STREQ(correct_arr, result);
 }
 
@@ -316,12 +187,12 @@ TEST_F(TestSearchSubstringOfTheMostCommonLengthSerial, correct_searching_with_ed
     out << "qwertjjkkkllllttooooqwertvvvv";
     out.close();
 
-    ASSERT_EQ(CORRECT, search_substring_of_the_most_common_length_serial(file_name, &result));
+    ASSERT_EQ(CORRECT, search_substring_of_the_most_common_length(file_name, &result));
     ASSERT_STREQ(correct_arr, result);
 }
 
 TEST_F(TestSearchSubstringOfTheMostCommonLengthSerial, open_file_failed) {
     char no_valid_file_name[11] = "./aaaa.txt";
 
-    ASSERT_EQ(OPEN_FILE_FAILED, search_substring_of_the_most_common_length_serial(no_valid_file_name, &result));
+    ASSERT_EQ(OPEN_FILE_FAILED, search_substring_of_the_most_common_length(no_valid_file_name, &result));
 }

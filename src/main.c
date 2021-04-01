@@ -2,19 +2,28 @@
 
 #include <time.h>
 #include <sys/time.h>
+#include <dlfcn.h>
 
-#include "serial/utils.h"
-#include "parallel/utils.h"
+#include "utils.h"
 
 int main() {
+    void *handle = dlopen("./libmost_frequent_seqence_parallel.so", RTLD_LAZY);
+    if (!handle) {
+        return 1;
+    }
+
     char *result_parallel = NULL;
-    const char *filename = "size_15000";
+    const char *filename = "text.txt";
+    int (*funcpt)();
+    *(void **)(&funcpt) = dlsym(handle, "search_substring_of_the_most_common_length");
     struct timeval start;
     struct timeval end;
 
     gettimeofday(&start, NULL);
-    int processes_number = search_substring_of_the_most_common_length_parallel(filename, &result_parallel);
+    int processes_number = (*funcpt)(filename, &result_parallel);
     gettimeofday(&end, NULL);
+
+    dlclose(handle);
 
     if (processes_number != CORRECT) {
         free(result_parallel);
@@ -27,7 +36,7 @@ int main() {
     char *result_serial = NULL;
 
     gettimeofday(&start, NULL);
-    int condition_of_function = search_substring_of_the_most_common_length_serial(filename, &result_serial);
+    int condition_of_function = search_substring_of_the_most_common_length(filename, &result_serial);
     gettimeofday(&end, NULL);
 
     if (condition_of_function != CORRECT) {

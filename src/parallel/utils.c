@@ -14,7 +14,13 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include "parallel/utils.h"
+#include "utils.h"
+#include "general/utils.h"
+
+typedef struct ArrMax {
+    int *arr;
+    int *max_length;
+} ArrMax;
 
 int create_shared_file(const char *filename, char **arr, int fd) {
     if ((arr == NULL) || (filename == NULL)) {
@@ -68,28 +74,6 @@ int create_shared_memory(int **arr, int size) {
     }
 
     return CORRECT;
-}
-
-int finding_number_of_processes(size_t size) {
-    if (size < 100) {
-        return 1;
-    }
-    if (size < 1000) {
-        return 2;
-    }
-    if (size < 5000) {
-        return 3;
-    }
-    if (size < 10000) {
-        return 4;
-    }
-    if (size < 20000) {
-        return 6;
-    }
-    if (size < 100000) {
-        return 7;
-    }
-    return 10;
 }
 
 int finding_partition_of_arr_char(int *arr_splitting, int number_of_processes, const char *my_arr, int size) {
@@ -203,7 +187,7 @@ int search_number_of_repeating_length_parallel(char *my_arr,
     return CORRECT;
 }
 
-int search_max_parallel(int *arr_max, int *arr_splitting_for_max, int *arr_counter, int processes_number) {
+int search_max_parallel(ArrMax *arr_max, int *arr_splitting_for_max, int *arr_counter, int processes_number) {
     if ((arr_max == NULL) || (arr_splitting_for_max == NULL)) {
         return NULL_PTR;
     }
@@ -215,80 +199,17 @@ int search_max_parallel(int *arr_max, int *arr_splitting_for_max, int *arr_count
     } else {
         start_position = arr_splitting_for_max[processes_number - 1];
     }
+    if (start_position < 2) {
+        start_position = 2;
+    }
     end_position = arr_splitting_for_max[processes_number];
     for (int i = start_position; i < end_position; i++) {
         if (arr_counter[i] > most_frequent_length_count) {
             most_frequent_length_count = arr_counter[i];
-            arr_max[processes_number] = i;
+            arr_max->arr[processes_number] = arr_counter[i];
+            arr_max->max_length[processes_number] = i;
         }
     }
-
-    return CORRECT;
-}
-
-int search_max(int *arr, int size) {
-    if (arr == NULL) {
-        return NULL_PTR;
-    }
-    int max = 0;
-    for (int i = 0; i < size; i++) {
-        if (arr[i] > max) {
-            max = arr[i];
-        }
-    }
-
-    return max;
-}
-
-int search_first_occurrence_of_substring(char *arr, int size, int most_frequent_length) {
-    if (arr == NULL) {
-        return NULL_PTR;
-    }
-    int temp_count = 1;
-    char previous;
-    previous = arr[0];
-    for (int i = 1; i < size; i++) {
-        char current = arr[i];
-        if (current == previous) {
-            temp_count++;
-        } else {
-            if (temp_count == most_frequent_length) {
-                return i - temp_count;
-            }
-            temp_count = 1;
-        }
-        previous = current;
-    }
-
-    return NO_SUBSTRING;
-}
-
-int search_substring(char *arr, int first_position_of_substring, int most_frequent_length, char *result) {
-    if ((arr == NULL) || (result == NULL)) {
-        return NULL_PTR;
-    }
-    int j = 0;
-    for (int i = first_position_of_substring; i < first_position_of_substring + most_frequent_length; i++) {
-        result[j] = arr[i];
-        j++;
-    }
-    result[j] = '\0';
-
-    return CORRECT;
-}
-
-int output(char *arr, int first_position_of_substring, int most_frequent_length, FILE *stream) {
-    if (arr == NULL) {
-        return NULL_PTR;
-    }
-    if (stream == NULL) {
-        return NULL_STREAM;
-    }
-    fprintf(stream, "Result: ");
-    for (int i = first_position_of_substring; i < first_position_of_substring + most_frequent_length; i++) {
-        putc(arr[i], stream);
-    }
-    fprintf(stream, "\n");
 
     return CORRECT;
 }
@@ -301,18 +222,19 @@ int free_main_resources(int fd, char *my_arr, int size, int *arr_counter, int *a
     return err;
 }
 
-int free_resources_for_max(int *arr_max, int *arr_splitting_for_max, int number_of_processes) {
-    int err = munmap(arr_max, number_of_processes);
+int free_resources_for_max(ArrMax *arr_max, int *arr_splitting_for_max, int number_of_processes) {
+    int err = munmap(arr_max->arr, number_of_processes);
+    err += munmap(arr_max->max_length, number_of_processes);
     err += munmap(arr_splitting_for_max, number_of_processes);
     return err;
 }
 
-int search_arr_of_repeating_length_parallel(int fd,
-                                            char *my_arr,
-                                            size_t size,
-                                            int *arr_counter,
-                                            int *arr_splitting,
-                                            int number_of_processes) {
+__attribute__((__always_inline__)) inline int search_arr_of_repeating_length_parallel(int fd,
+                                                                                      char *my_arr,
+                                                                                      size_t size,
+                                                                                      int *arr_counter,
+                                                                                      int *arr_splitting,
+                                                                                      int number_of_processes) {
     pid_t *pids = (pid_t *)malloc(sizeof(pid_t) * number_of_processes);
     if (pids == NULL) {
         free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
@@ -369,14 +291,14 @@ int search_arr_of_repeating_length_parallel(int fd,
     return CORRECT;
 }
 
-int search_arr_max_parallel(int fd,
-                            char *my_arr,
-                            size_t size,
-                            int *arr_counter,
-                            int *arr_splitting,
-                            int *arr_max,
-                            int *arr_splitting_for_max,
-                            int number_of_processes) {
+__attribute__((__always_inline__)) inline int search_arr_max_parallel(int fd,
+                                                                      char *my_arr,
+                                                                      size_t size,
+                                                                      int *arr_counter,
+                                                                      int *arr_splitting,
+                                                                      ArrMax *arr_max,
+                                                                      int *arr_splitting_for_max,
+                                                                      int number_of_processes) {
     pid_t *pids = (pid_t *)malloc(sizeof(pid_t) * number_of_processes);
     if (pids == NULL) {
         int err = free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
@@ -424,7 +346,7 @@ int search_arr_max_parallel(int fd,
     return CORRECT;
 }
 
-int search_substring_of_the_most_common_length_parallel(const char *filename, char **result) {
+int search_substring_of_the_most_common_length(const char *filename, char **result) {
     char *my_arr = NULL;
     int fd = 0;
     int size = create_shared_file(filename, &my_arr, fd);
@@ -444,7 +366,7 @@ int search_substring_of_the_most_common_length_parallel(const char *filename, ch
         return condition_of_function;
     }
 
-    int number_of_processes = finding_number_of_processes(size);
+    int number_of_processes = sysconf(_SC_NPROCESSORS_ONLN);
 
     int *arr_splitting = NULL;
     condition_of_function = create_shared_memory(&arr_splitting, number_of_processes);
@@ -481,10 +403,19 @@ int search_substring_of_the_most_common_length_parallel(const char *filename, ch
         return condition_of_function;
     }
 
-    int *arr_max = NULL;
-    condition_of_function = create_shared_memory(&arr_max, number_of_processes);
+    ArrMax arr_max;
+    condition_of_function = create_shared_memory(&(arr_max.arr), number_of_processes);
     if (condition_of_function != CORRECT) {
         int err = free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
+        if (err != CORRECT) {
+            return err;
+        }
+        return condition_of_function;
+    }
+    condition_of_function = create_shared_memory(&(arr_max.max_length), number_of_processes);
+    if (condition_of_function != CORRECT) {
+        int err = free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
+        err += munmap(arr_max.arr, number_of_processes);
         if (err != CORRECT) {
             return err;
         }
@@ -495,6 +426,8 @@ int search_substring_of_the_most_common_length_parallel(const char *filename, ch
     condition_of_function = create_shared_memory(&arr_splitting_for_max, number_of_processes);
     if (condition_of_function != CORRECT) {
         int err = free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
+        err += munmap(arr_max.arr, number_of_processes);
+        err += munmap(arr_max.max_length, number_of_processes);
         if (err != CORRECT) {
             return err;
         }
@@ -508,7 +441,7 @@ int search_substring_of_the_most_common_length_parallel(const char *filename, ch
 
     if (condition_of_function != CORRECT) {
         int err = free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-        err += munmap(arr_max, number_of_processes);
+        err += munmap(&arr_max, number_of_processes);
         if (err != CORRECT) {
             return err;
         }
@@ -520,22 +453,24 @@ int search_substring_of_the_most_common_length_parallel(const char *filename, ch
                                                     size,
                                                     arr_counter,
                                                     arr_splitting,
-                                                    arr_max,
+                                                    &arr_max,
                                                     arr_splitting_for_max,
                                                     number_of_processes);
+
     if (condition_of_function != CORRECT) {
         int err = free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-        err += free_resources_for_max(arr_max, arr_splitting_for_max, number_of_processes);
+        err += free_resources_for_max(&arr_max, arr_splitting_for_max, number_of_processes);
         if (err != CORRECT) {
             return err;
         }
         return condition_of_function;
     }
 
-    int most_frequent_length = search_max(arr_max, number_of_processes);
+    int most_frequent_value = search_max(arr_max.arr, number_of_processes);
+    int most_frequent_length = arr_max.max_length[most_frequent_value];
     if (most_frequent_length < 0) {
         int err = free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-        err += free_resources_for_max(arr_max, arr_splitting_for_max, number_of_processes);
+        err += free_resources_for_max(&arr_max, arr_splitting_for_max, number_of_processes);
         if (err != CORRECT) {
             return err;
         }
@@ -545,7 +480,7 @@ int search_substring_of_the_most_common_length_parallel(const char *filename, ch
     int first_position_of_substring = search_first_occurrence_of_substring(my_arr, size, most_frequent_length);
     if (first_position_of_substring < 0) {
         int err = free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-        err += free_resources_for_max(arr_max, arr_splitting_for_max, number_of_processes);
+        err += free_resources_for_max(&arr_max, arr_splitting_for_max, number_of_processes);
         if (err != CORRECT) {
             return err;
         }
@@ -556,7 +491,7 @@ int search_substring_of_the_most_common_length_parallel(const char *filename, ch
         (*result) = (char *)malloc(sizeof(char) * (most_frequent_length + 1));
         if (*result == NULL) {
             int err = free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-            err += free_resources_for_max(arr_max, arr_splitting_for_max, number_of_processes);
+            err += free_resources_for_max(&arr_max, arr_splitting_for_max, number_of_processes);
             if (err != CORRECT) {
                 return err;
             }
@@ -572,7 +507,7 @@ int search_substring_of_the_most_common_length_parallel(const char *filename, ch
     if (condition_of_function != CORRECT) {
         free(*result);
         int err = free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-        err += free_resources_for_max(arr_max, arr_splitting_for_max, number_of_processes);
+        err += free_resources_for_max(&arr_max, arr_splitting_for_max, number_of_processes);
         if (err != CORRECT) {
             return err;
         }
@@ -583,7 +518,7 @@ int search_substring_of_the_most_common_length_parallel(const char *filename, ch
     if (condition_of_function != CORRECT) {
         free(*result);
         int err = free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-        err += free_resources_for_max(arr_max, arr_splitting_for_max, number_of_processes);
+        err += free_resources_for_max(&arr_max, arr_splitting_for_max, number_of_processes);
         if (err != CORRECT) {
             return err;
         }
@@ -591,7 +526,7 @@ int search_substring_of_the_most_common_length_parallel(const char *filename, ch
     }
 
     int err = free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
-    err += free_resources_for_max(arr_max, arr_splitting_for_max, number_of_processes);
+    err += free_resources_for_max(&arr_max, arr_splitting_for_max, number_of_processes);
     if (err != CORRECT) {
         return err;
     }

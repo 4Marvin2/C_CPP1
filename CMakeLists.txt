@@ -43,16 +43,20 @@ set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
 include_directories("${PROJECT_SOURCE_DIR}/include")
 
 add_library(most_frequent_seqence_serial STATIC
-        ${INC_DIR}/serial/utils.h
+        ${INC_DIR}/general/utils.h
+        ${SRC_DIR}/general/utils.c
+        ${INC_DIR}/utils.h
         ${SRC_DIR}/serial/utils.c)
 
-add_library(most_frequent_seqence_parallel SHARED
-        ${INC_DIR}/parallel/utils.h
+add_library(most_frequent_seqence_parallel MODULE
+        ${INC_DIR}/general/utils.h
+        ${SRC_DIR}/general/utils.c
+        ${INC_DIR}/utils.h
         ${SRC_DIR}/parallel/utils.c)
 
 add_executable(HW2 ${SRC_DIR}/main.c)
 
-target_link_libraries(HW2 Threads::Threads pthread most_frequent_seqence_serial most_frequent_seqence_parallel)
+target_link_libraries(HW2 Threads::Threads pthread -ldl most_frequent_seqence_serial)
 
 target_include_directories(HW2 PUBLIC ${INC_DIR})
 ##

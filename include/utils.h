@@ -1,5 +1,5 @@
-#ifndef INCLUDE_PARALLEL_UTILS_H_
-#define INCLUDE_PARALLEL_UTILS_H_
+#ifndef INCLUDE_UTILS_H_
+#define INCLUDE_UTILS_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,6 +26,6 @@
 #define NO_SUBSTRING -7
 
 // нахождение подстроки самой часто встречаемой длины (параллельно)
-int search_substring_of_the_most_common_length_parallel(const char *filename, char **result);
+int search_substring_of_the_most_common_length(const char *filename, char **result);
 
-#endif  // INCLUDE_PARALLEL_UTILS_H_
+#endif  // INCLUDE_UTILS_H_
