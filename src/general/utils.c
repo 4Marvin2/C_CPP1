@@ -6,6 +6,7 @@
 
 #include "general/utils.h"
 
+// нахождение максимума в массиве
 int search_max(int *arr, int size) {
     if (arr == NULL) {
         return NULL_PTR;
@@ -22,6 +23,7 @@ int search_max(int *arr, int size) {
     return max_index;
 }
 
+// нахождение подстроки
 int search_substring(char *arr, int first_position_of_substring, int most_frequent_length, char *result) {
     if ((arr == NULL) || (result == NULL)) {
         return NULL_PTR;
@@ -36,6 +38,7 @@ int search_substring(char *arr, int first_position_of_substring, int most_freque
     return CORRECT;
 }
 
+// вывод результата
 int output(char *arr, int first_position_of_substring, int most_frequent_length, FILE *stream) {
     if (arr == NULL) {
         return NULL_PTR;
@@ -52,6 +55,7 @@ int output(char *arr, int first_position_of_substring, int most_frequent_length,
     return CORRECT;
 }
 
+// нахождение индекса первого вхождения подстроки
 int search_first_occurrence_of_substring(char *arr, int size, int most_frequent_length) {
     if (arr == NULL) {
         return NULL_PTR;

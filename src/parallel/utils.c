@@ -17,11 +17,15 @@
 #include "utils.h"
 #include "general/utils.h"
 
-typedef struct ArrMax {
+// структура для хранения массива максимальных кол-в вхождений подстроки и максимальных длин подстрок в подмассивах
+typedef struct max_length_by_section {
     int *arr;
     int *max_length;
-} ArrMax;
+} max_length_by_section;
 
+// принимает имя файла, указатель на массив, в который запишутся данные из файла, файловый дескриптор
+// создает расшареный файл
+// возвращает размер считанных данных или код ошибки в случае неудачи
 int create_shared_file(const char *filename, char **arr, int fd) {
     if ((arr == NULL) || (filename == NULL)) {
         return NULL_PTR;
@@ -53,6 +57,9 @@ int create_shared_file(const char *filename, char **arr, int fd) {
     return size;
 }
 
+// принимает указатель на массив, по которому будет выделятся память, и размер массива
+// создает расшаренный массив, инициализированный нулями
+// возвращает код ошибки либо CORRECT, если все успешно
 int create_shared_memory(int **arr, int size) {
     if (arr == NULL) {
         return NULL_PTR;
@@ -76,6 +83,10 @@ int create_shared_memory(int **arr, int size) {
     return CORRECT;
 }
 
+// принимает массив, хранящий индексы разделения символьного массива,
+// количество процессов, символьный массив, его размер
+// находит разбиение символьного массива (индексы) в зависимости от кол-ва процессов
+// возвращает код ошибки либо CORRECT, если все успешно
 int finding_partition_of_arr_char(int *arr_splitting, int number_of_processes, const char *my_arr, int size) {
     if ((arr_splitting == NULL) || (my_arr == NULL)) {
         return NULL_PTR;
@@ -115,6 +126,9 @@ int finding_partition_of_arr_char(int *arr_splitting, int number_of_processes, c
     return CORRECT;
 }
 
+// принимает массив, хранящий индексы разделения числового массива, количество процессов, числовой массив и его размер
+// находит разбиение числового массива (индексы) в зависимости от кол-ва процессов
+// возвращает код ошибки либо CORRECT, если все успешно
 int finding_partition_of_arr_int(int *arr_splitting, int number_of_processes, const int *my_arr, size_t size) {
     if ((arr_splitting == NULL) || (my_arr == NULL)) {
         return NULL_PTR;
@@ -136,6 +150,9 @@ int finding_partition_of_arr_int(int *arr_splitting, int number_of_processes, co
     return CORRECT;
 }
 
+// принимает кол-во процессов и массив для записи их PID
+// создает дочерние процессы, родительский процесс сохраняет PIDы дочерних процессов
+// возвращает код ошибки либо CORRECT, если все успешно
 int create_forks(int number_of_processes, int *pids) {
     if (pids == NULL) {
         return NULL_PTR;
@@ -153,6 +170,10 @@ int create_forks(int number_of_processes, int *pids) {
     return PARENT_PID;
 }
 
+// принимает символьный массив, массив разбиения символьного массива, массив-счетчик, кол-во процессов
+// ищет количество повторяющихся символов и записывает в счетчик по индексу, равному длинне подстроки
+// каждый процесс ищет в своем секторе основного массива
+// возвращает код ошибки либо CORRECT, если все успешно
 int search_number_of_repeating_length_parallel(char *my_arr,
                                                int *arr_splitting,
                                                int *arr_counter,
@@ -184,7 +205,15 @@ int search_number_of_repeating_length_parallel(char *my_arr,
     return CORRECT;
 }
 
-int search_max_parallel(ArrMax *arr_max, int *arr_splitting_for_max, int *arr_counter, int processes_number) {
+// принимает массив, хранящий максимальные кол-ва вхождений подстроки и максимальные длины подстрок в подмассивах,
+// массив разбиений, массив-счетчик, кол-во процессов
+// находит максимальные элементы на каждом участке основного массива и соответствующии им значения длин
+// каждый процесс ищет в своем секторе основного массива
+// возвращает код ошибки либо CORRECT, если все успешно
+int search_max_parallel(max_length_by_section *arr_max,
+                        int *arr_splitting_for_max,
+                        int *arr_counter,
+                        int processes_number) {
     if ((arr_max == NULL) || (arr_splitting_for_max == NULL)) {
         return NULL_PTR;
     }
@@ -211,6 +240,9 @@ int search_max_parallel(ArrMax *arr_max, int *arr_splitting_for_max, int *arr_co
     return CORRECT;
 }
 
+// принимает файловый дескриптор, символьный массив, его размер, массив-счетчик, массив разбиения, кол-во процессов
+// очищает ресурсы
+// возвращает код ошибки либо CORRECT, если все успешно
 int free_main_resources(int fd, char *my_arr, int size, int *arr_counter, int *arr_splitting, int number_of_processes) {
     close(fd);
     int err = munmap(my_arr, size - 1);
@@ -219,13 +251,20 @@ int free_main_resources(int fd, char *my_arr, int size, int *arr_counter, int *a
     return err;
 }
 
-int free_resources_for_max(ArrMax *arr_max, int *arr_splitting_for_max, int number_of_processes) {
+// принимает массив структур максимумов, массив разбиения, кол-во процессов
+// очищает ресурсы, которые используются для поиска максимума
+// возвращает код ошибки либо CORRECT, если все успешно
+int free_resources_for_max(max_length_by_section *arr_max, int *arr_splitting_for_max, int number_of_processes) {
     int err = munmap(arr_max->arr, number_of_processes);
     err += munmap(arr_max->max_length, number_of_processes);
     err += munmap(arr_splitting_for_max, number_of_processes);
     return err;
 }
 
+// принимает файловый дескриптор, символьный массив, его размер, массив-счетчик, массив разбиения, кол-во процессов
+// создает дочерние процессы
+// и каждый процесс на своем участке основного массива ищет кол-во вхождений повторяющихся символов
+// возвращает код ошибки либо CORRECT, если все успешно
 __attribute__((__always_inline__)) inline int search_arr_of_repeating_length_parallel(int fd,
                                                                                       char *my_arr,
                                                                                       size_t size,
@@ -276,12 +315,16 @@ __attribute__((__always_inline__)) inline int search_arr_of_repeating_length_par
     return CORRECT;
 }
 
+// принимает файловый дескриптор, символьный массив, его размер, массив-счетчик, массив разбиения,
+// массив структур максимумов, массив разбиения для поиска максимума, кол-во процессов
+// создает дочернии процессы и каждый процесс на своем участке массива ищет самую часто повторяющуюся длину подстроки
+// возвращает код ошибки либо CORRECT, если все успешно
 __attribute__((__always_inline__)) inline int search_arr_max_parallel(int fd,
                                                                       char *my_arr,
                                                                       size_t size,
                                                                       int *arr_counter,
                                                                       int *arr_splitting,
-                                                                      ArrMax *arr_max,
+                                                                      max_length_by_section *arr_max,
                                                                       int *arr_splitting_for_max,
                                                                       int number_of_processes) {
     pid_t *pids = (pid_t *)malloc(sizeof(pid_t) * number_of_processes);
@@ -331,6 +374,9 @@ __attribute__((__always_inline__)) inline int search_arr_max_parallel(int fd,
     return CORRECT;
 }
 
+// принимает имя файла и указатель на массив, куда будет записана результирующая подстрока
+// находит представителя серии символов самой часто встречаемой длины
+// возвращает код ошибки либо CORRECT, если все успешно
 int search_substring_of_the_most_common_length(const char *filename, char **result) {
     char *my_arr = NULL;
     int fd = 0;
@@ -388,7 +434,7 @@ int search_substring_of_the_most_common_length(const char *filename, char **resu
         return condition_of_function;
     }
 
-    ArrMax arr_max;
+    max_length_by_section arr_max;
     condition_of_function = create_shared_memory(&(arr_max.arr), number_of_processes);
     if (condition_of_function != CORRECT) {
         int err = free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);

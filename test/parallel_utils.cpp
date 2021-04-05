@@ -304,7 +304,7 @@ class TestSearchMaxParallel: public ::testing::Test {
         }
     }
     int *pids = nullptr;
-    ArrMax arr_max;
+    max_length_by_section arr_max;
     int *arr_splitting_for_max = nullptr;
     int *arr_counter = nullptr;
     int *correct_arr_max = nullptr;

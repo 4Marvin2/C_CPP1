@@ -10,6 +10,9 @@
 #define MIN_ARR_SIZE 1
 #define BUFFERSIZE 10
 
+// принимает имя файла, указатель на массив, который будет хранить данные из файла и файловый дескриптор
+// отображает файла в память
+// возвращает код ошибки либо CORRECT, если все успешно
 int input(const char *filename, char **arr, int fd) {
     if ((arr == NULL) || (filename == NULL)) {
         return NULL_PTR;
@@ -40,6 +43,9 @@ int input(const char *filename, char **arr, int fd) {
     return CORRECT;
 }
 
+// принимает размер
+// создает массив, проинициализированный нулями
+// возвращает указатель на созданный массив
 int* create_arr_counter(int size) {
     int *number_of_repeating_length = (int *)malloc(sizeof(int) * size);
     if (number_of_repeating_length == NULL) {
@@ -52,6 +58,9 @@ int* create_arr_counter(int size) {
     return number_of_repeating_length;
 }
 
+// принимает символьный массив, его размер, массив-счетчик
+// ищет количество повторяющихся символов и записывает в счетчик по индексу, равному длинне подстроки
+// возвращает код ошибки либо CORRECT, если все успешно
 int search_number_of_repeating_length(char *arr, int size, int *arr_counter) {
     if ((arr == NULL) || (arr_counter == NULL)) {
         return NULL_PTR;
@@ -71,6 +80,9 @@ int search_number_of_repeating_length(char *arr, int size, int *arr_counter) {
     return CORRECT;
 }
 
+// принимает массив и его размер
+// ищет максимальное значение
+// возвращает индекс (длина подстроки) максимального значения
 int search_most_frequent_value(int *arr_counter, int size) {
     if (arr_counter == NULL) {
         return NULL_PTR;
@@ -87,6 +99,9 @@ int search_most_frequent_value(int *arr_counter, int size) {
     return most_frequent_length;
 }
 
+// принимает файловый дескриптор, символьный массив, его размер, числовой массив
+// очищает ресурсы
+// возвращает код ошибки либо CORRECT, если все успешно
 int free_resources(int fd, char *first_arr, int size, int *second_arr) {
     close(fd);
     int err = munmap(first_arr, size);
@@ -98,6 +113,9 @@ int free_resources(int fd, char *first_arr, int size, int *second_arr) {
     return CORRECT;
 }
 
+// принимает имя файла и указатель на массив, куда будет записана результирующая подстрока
+// находит представителя серии символов самой часто встречаемой длины
+// возвращает код ошибки либо CORRECT, если все успешно
 int search_substring_of_the_most_common_length(const char *filename, char **result) {
     char *my_arr = NULL;
     int fd = 0;

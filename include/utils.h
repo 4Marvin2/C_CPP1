@@ -25,7 +25,7 @@
 #define MUNMAP_FAILED -8
 #define NO_SUBSTRING -7
 
-// нахождение подстроки самой часто встречаемой длины (параллельно)
+// нахождение подстроки самой часто встречаемой длины
 int search_substring_of_the_most_common_length(const char *filename, char **result);
 
 #endif  // INCLUDE_UTILS_H_
