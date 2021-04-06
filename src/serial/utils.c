@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "utils.h"
-#include "general/utils.h"
+#include "general/general_functions.h"
 
 #define MIN_ARR_SIZE 1
 #define BUFFERSIZE 10
@@ -47,8 +47,9 @@ int input(const char *filename, char **arr, int fd) {
 // создает массив, проинициализированный нулями
 // возвращает указатель на созданный массив
 int* create_arr_counter(int size) {
-    int *number_of_repeating_length = (int *)malloc(sizeof(int) * size);
-    if (number_of_repeating_length == NULL) {
+    int *number_of_repeating_length = NULL;
+    int cache_line_size = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
+    if (posix_memalign((void **)&number_of_repeating_length, cache_line_size, sizeof(int) * size) != CORRECT) {
         return NULL;
     }
     for (int i = 0; i < size; i++) {
@@ -161,7 +162,14 @@ int search_substring_of_the_most_common_length(const char *filename, char **resu
     }
 
     if (*result == NULL) {
-        (*result) = (char *)malloc(sizeof(char) * (most_frequent_length + 1));
+        int cache_line_size = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
+        if (posix_memalign((void **)result, cache_line_size, sizeof(char) * (most_frequent_length + 1)) != CORRECT) {
+            int err = free_resources(fd, my_arr, length, number_of_repeating_length);
+            if (err != CORRECT) {
+                return err;
+            }
+            return NULL_PTR;
+        }
     }
 
     condition_of_function = search_substring(my_arr, first_position_of_substring, most_frequent_length, *result);

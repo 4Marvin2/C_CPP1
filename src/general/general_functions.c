@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "general/utils.h"
+#include "general/general_functions.h"
 
 // нахождение максимума в массиве
 int search_max(int *arr, int size) {

@@ -8,7 +8,7 @@
 #include "gtest/gtest.h"
 
 extern "C" {
-#include "general/utils.h"
+#include "general/general_functions.h"
 }
 
 // тесты search_max

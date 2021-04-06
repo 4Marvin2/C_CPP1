@@ -9,7 +9,7 @@
 extern "C" {
 #include "utils.h"
 #include "../src/serial/utils.c"
-#include "general/utils.h"
+#include "general/general_functions.h"
 }
 
 // тесты input

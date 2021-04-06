@@ -10,7 +10,7 @@
 extern "C" {
 #include "utils.h"
 #include "../src/parallel/utils.c"
-#include "general/utils.h"
+#include "general/general_functions.h"
 }
 
 // тесты create_shared_file

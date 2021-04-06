@@ -15,7 +15,7 @@
 #include <sys/time.h>
 
 #include "utils.h"
-#include "general/utils.h"
+#include "general/general_functions.h"
 
 // структура для хранения массива максимальных кол-в вхождений подстроки и максимальных длин подстрок в подмассивах
 typedef struct max_length_by_section {
@@ -271,8 +271,9 @@ __attribute__((__always_inline__)) inline int search_arr_of_repeating_length_par
                                                                                       int *arr_counter,
                                                                                       int *arr_splitting,
                                                                                       int number_of_processes) {
-    pid_t *pids = (pid_t *)malloc(sizeof(pid_t) * number_of_processes);
-    if (pids == NULL) {
+    int cache_line_size = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
+    pid_t *pids = NULL;
+    if (posix_memalign((void **)&pids, cache_line_size, sizeof(pid_t) * number_of_processes) != CORRECT) {
         free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
         return NULL_PTR;
     }
@@ -327,8 +328,9 @@ __attribute__((__always_inline__)) inline int search_arr_max_parallel(int fd,
                                                                       max_length_by_section *arr_max,
                                                                       int *arr_splitting_for_max,
                                                                       int number_of_processes) {
-    pid_t *pids = (pid_t *)malloc(sizeof(pid_t) * number_of_processes);
-    if (pids == NULL) {
+    int cache_line_size = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
+    pid_t *pids = NULL;
+    if (posix_memalign((void **)&pids, cache_line_size, sizeof(pid_t) * number_of_processes) != CORRECT) {
         int err = free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
         if (err != CORRECT) {
             return err;
@@ -519,8 +521,8 @@ int search_substring_of_the_most_common_length(const char *filename, char **resu
     }
 
     if (*result == NULL) {
-        (*result) = (char *)malloc(sizeof(char) * (most_frequent_length + 1));
-        if (*result == NULL) {
+        int cache_line_size = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
+        if (posix_memalign((void **)result, cache_line_size, sizeof(char) * (most_frequent_length + 1)) != CORRECT) {
             int err = free_main_resources(fd, my_arr, size, arr_counter, arr_splitting, number_of_processes);
             err += free_resources_for_max(&arr_max, arr_splitting_for_max, number_of_processes);
             if (err != CORRECT) {

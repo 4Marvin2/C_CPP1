@@ -43,14 +43,14 @@ set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
 include_directories("${PROJECT_SOURCE_DIR}/include")
 
 add_library(most_frequent_seqence_serial STATIC
-        ${INC_DIR}/general/utils.h
-        ${SRC_DIR}/general/utils.c
+        ${INC_DIR}/general/general_functions.h
+        ${SRC_DIR}/general/general_functions.c
         ${INC_DIR}/utils.h
         ${SRC_DIR}/serial/utils.c)
 
 add_library(most_frequent_seqence_parallel MODULE
-        ${INC_DIR}/general/utils.h
-        ${SRC_DIR}/general/utils.c
+        ${INC_DIR}/general/general_functions.h
+        ${SRC_DIR}/general/general_functions.c
         ${INC_DIR}/utils.h
         ${SRC_DIR}/parallel/utils.c)
 

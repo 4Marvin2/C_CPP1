@@ -1,5 +1,5 @@
-#ifndef INCLUDE_GENERAL_UTILS_H_
-#define INCLUDE_GENERAL_UTILS_H_
+#ifndef INCLUDE_GENERAL_GENERAL_FUNCTIONS_H_
+#define INCLUDE_GENERAL_GENERAL_FUNCTIONS_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,4 +21,4 @@ int output(char *arr, int first_position_of_substring, int most_frequent_length,
 
 int search_first_occurrence_of_substring(char *arr, int size, int most_frequent_length);
 
-#endif  // INCLUDE_GENERAL_UTILS_H_
+#endif  // INCLUDE_GENERAL_GENERAL_FUNCTIONS_H_
