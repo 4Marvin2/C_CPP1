@@ -1,0 +1,4 @@
+ignore:
+  - "src/main.c"
+  - "src/time_comprasion.c"
+  - "test/stress.cpp"

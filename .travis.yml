@@ -1,0 +1,35 @@
+dist:     focal
+sudo:     required
+
+language: c
+
+compiler:
+    - gcc
+
+install:
+    - sudo apt-get install valgrind
+    - sudo pip install cpplint
+    - sudo apt install cppcheck
+
+script:
+    - cpplint --extensions=c include/*/* src/*/*
+    - cpplint --extensions=cpp test/*.cpp
+    - cppcheck --inconclusive --enable=all --language=c src/*
+    - mkdir build && cd build
+    - cmake ..
+    - make clean && make
+    - cd ..
+    - cd test/generator
+    - bash file_generator.sh
+    - find . -name "size*" -exec cp {} ../../build/test/ \;
+    - rm size*
+    - cd ../../build/test
+    - valgrind --track-origins=yes --child-silent-after-fork=yes --leak-check=full ./serial_utils_tests
+    - valgrind --track-origins=yes --child-silent-after-fork=yes --leak-check=full ./parallel_utils_tests
+    - valgrind --track-origins=yes --child-silent-after-fork=yes --leak-check=full ./general_utils_tests
+    - valgrind --track-origins=yes --child-silent-after-fork=yes --leak-check=full ./stress_tests
+    - cd ..
+    - ./time_comparison
+
+after_success:
+    - bash <(curl -s https://codecov.io/bash)
